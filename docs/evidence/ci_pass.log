@@ -14,9 +14,9 @@ Godot Engine v4.7.2.stable.arch_linux.ed1daf0bf (2026-08-17 01:18:38 UTC) - http
 [TEST] tuning_test            32 assertions, 0 failures
 [TEST] character_test         35 assertions, 0 failures
 [TEST] polish_test            51 assertions, 0 failures
-[TEST] capture_test           10 assertions, 0 failures
+[TEST] capture_test           12 assertions, 0 failures
 [TEST] night_test             17 assertions, 0 failures
-[TEST] 183 assertions, 0 failures, 38.5s
+[TEST] 185 assertions, 0 failures, 37.4s
 == assets ==
 assets: 16 imported binaries
 OK

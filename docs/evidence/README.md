@@ -7,7 +7,8 @@ command and machine that produced it.
 |---|---|---|
 | `perf_frame.png` | 200-zombie stress run, 1280×720, night lighting, horde staged in front of the player, flamethrower firing | `tools/perf.sh 60 5` |
 | `perf.json` | Frame time, draw calls, triangles, VRAM, engine/GPU/window for the same 60 s run | `tools/perf.sh 60 5` |
-| `flame_feel.mp4` | 8 s staged take at 30 fps: flame stream crossing three burning shamblers, HUD fuel drain, 3 kills | `DRIVER=x11 tools/capture.sh 8 30` |
+| `flame_feel.mp4` | 60 s staged take at 30 fps: flame stream crossing three burning shamblers, HUD fuel drain (14 of 100 left at cut), 34 kills, slow camera drift | `DRIVER=x11 tools/capture.sh 60 30` |
+| `flame_feel_8s.mp4` | 8 s staged take at 30 fps: the same composition, shorter, used for a quick read | `DRIVER=x11 tools/capture.sh 8 30` |
 | `capture.json` | Provenance for that take: engine, GPU, frames, kills, `staged: true`, `player_invulnerable: true` | written by the same command |
 | `capture_failure.log` | Same proof for the capture suite: one assertion broken, runner exits 1, then reverted | see the log header |
 | `smoke.json` | Seven-night headless smoke run: victory, phases, spawn and kill counts | `godot --headless --path . -- --smoke --fresh` |
@@ -51,8 +52,18 @@ writes the project's 1600×900 viewport; the encoder downscales to 1280×720, so
 the clip is not a resolution claim. `capture.json` records what happened: 241
 frames, 3 kills, GPU and engine version.
 
+The take is 60 s at 30 fps, rendered offline by Movie Maker mode. Movie Maker
+writes a frame sequence at the project viewport (1600×900) and the encoder
+downscales to 1280×720, so the file is labelled 720p. It is not a gameplay
+recording: the player is invulnerable, the horde is staged, and the crowd size
+is fixed by `CROWD_SIZE`. The provenance is in `capture.json` (`staged: true`,
+`player_invulnerable: true`); a 60 s take shows `fuel_end: 14` and 34 kills.
+
 The clip shows the flame reading as a stream with a bright core, embers on the
-burning bodies, and the fuel gauge draining. Operator review on 2026-10-25
-judged that the flame reads. That is one human viewer judging this committed
-file; it is not a playtest and it does not touch the frame-time gate. The take
-is 8 s, so the 60 s recording the plan asks for does not exist yet.
+burning bodies, and the fuel gauge draining. The camera eases back a metre and
+a half over the minute so the take breathes. Operator review on 2026-10-25
+judged that the 8 s take reads; the 60 s take is the same composition with a
+slow drift and a tank that lasts the whole clip. That is one human viewer
+judging the committed file; it is not a playtest and it does not touch the
+frame-time gate. Frame time is unrelated to the clip: the perf numbers above
+still fail on this machine.

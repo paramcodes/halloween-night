@@ -32,6 +32,8 @@ fi
 mkdir -p "$(dirname "$OUT_ABS")"
 rm -f "$OUT_ABS" capture.json
 rm -rf build/capture
+mkdir -p build
+touch build/.gdignore
 
 MOVIE_TARGET="$OUT_ABS"
 if [ "${OUT_ABS##*.}" != "avi" ]; then

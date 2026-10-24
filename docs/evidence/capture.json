@@ -1,18 +1,21 @@
 {
 	"engine": "4.7.2-stable (arch_linux)",
-	"frames": 241,
+	"frames": 1801,
+	"fuel_end": 14.0,
+	"fuel_net_drain": 1.5,
+	"fuel_top_up_rate": 4.5,
 	"gpu": "Intel(R) HD Graphics 4400 (HSW GT2)",
-	"kills_during_capture": 3,
-	"kills_total": 3.0,
+	"kills_during_capture": 34,
+	"kills_total": 34.0,
 	"player_invulnerable": true,
-	"seconds": 8.0,
+	"seconds": 60.0,
 	"slot_hp": [
-		100.0,
-		77.0,
+		0.0,
+		72.0,
 		80.0
 	],
 	"staged": true,
-	"timestamp": "2026-10-24T20:32:36",
+	"timestamp": "2026-10-24T23:00:31",
 	"window": [
 		1280,
 		720

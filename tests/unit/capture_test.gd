@@ -28,3 +28,22 @@ func test_burning_body_carries_its_own_fire() -> void:
 	await runner.get_tree().process_frame
 	check(visual.get_node_or_null("BurnParticles") == null, "the fire is freed with the burn")
 	visual.queue_free()
+
+
+## The staged top-up is what lets a 60 s take keep firing. A fixed-interval drip
+## quantised down to 4.05 fuel/s on a 30 fps render, so the tank emptied at 51 s
+## and the last seconds of the clip had no flame.
+func test_staged_top_up_keeps_the_tank_for_a_minute() -> void:
+	var burn := Game.tuning.burn_rate_per_second
+	var frame := 1.0 / 30.0
+	var fuel := Game.tuning.fuel_capacity
+	var credit := 0.0
+	var lowest := fuel
+	for _i in range(1800):
+		fuel = maxf(0.0, fuel - burn * frame)
+		var step := CaptureRig.fuel_step(frame, credit, burn, 1.5)
+		credit = step[0]
+		fuel = minf(Game.tuning.fuel_capacity, fuel + step[1])
+		lowest = minf(lowest, fuel)
+	almost(lowest, 10.0, 1.0, "a minute of fire drains the tank by 90")
+	greater(lowest, 5.0, "the flame never runs dry mid-take")

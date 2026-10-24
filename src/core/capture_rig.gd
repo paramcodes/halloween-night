@@ -13,6 +13,13 @@ extends Node
 const CROWD_SIZE := 40
 const SUMMARY_PATH := "res://capture.json"
 const SEED := 20251025
+## A full tank is 16.6 s of fire, so a 60 s take would go dark after a quarter of
+## the clip. The rig tops the tank up at the burn rate minus FUEL_NET_DRAIN, so
+## the gauge drains slowly for the whole take instead of emptying at 17 s.
+const FUEL_NET_DRAIN := 1.5
+## Top-ups are applied once they reach this many units of fuel, which keeps the
+## HUD from publishing every frame without changing the rate.
+const FUEL_STEP := 0.5
 ## Lane slots in front of the player: x is lateral, y is forward distance.
 ## One body per slot, so burning targets never stack on the same point.
 const CONTACT_SLOTS := [Vector2(-1.6, 4.4), Vector2(-0.1, 4.9), Vector2(1.4, 4.5)]
@@ -26,10 +33,15 @@ var _elapsed := 0.0
 var _frames := 0
 var _contact_timer := 0.0
 var _top_up_timer := 0.0
+var _fuel_credit := 0.0
 var _firing := false
 var _rng := RandomNumberGenerator.new()
 var _kills_at_start := 0.0
 var _camera: Camera3D
+var _cam_from := Vector3.ZERO
+var _cam_to := Vector3.ZERO
+var _look_from := Vector3.ZERO
+var _look_to := Vector3.ZERO
 var _slot_holders: Array[Zombie] = []
 
 
@@ -53,6 +65,18 @@ func setup(target: Player, horde: NightDirector, world: Village, seconds: float)
 	)
 
 
+## One frame of the staged top-up. Returns `[credit, amount]`: fuel is only added
+## once the credit reaches `FUEL_STEP`, but the credit carries over, so the
+## average stays at `burn_rate - net_drain` whatever the frame time. A fixed-fps
+## render quantised a fixed-interval drip down to 4.05 fuel/s and ran the tank
+## dry at 51 s of a 60 s take.
+static func fuel_step(delta: float, credit: float, burn_rate: float, net_drain: float) -> Array:
+	credit += maxf(0.0, burn_rate - net_drain) * delta
+	if credit < FUEL_STEP:
+		return [credit, 0.0]
+	return [0.0, credit]
+
+
 func _process(delta: float) -> void:
 	_elapsed += delta
 	_frames += 1
@@ -62,6 +86,7 @@ func _process(delta: float) -> void:
 	if _firing and _elapsed >= maxf(1.0, duration - 1.8):
 		_firing = false
 		Input.action_release("fire")
+	_drift_camera()
 	_contact_timer -= delta
 	if _firing and _contact_timer <= 0.0:
 		_contact_timer = 0.25
@@ -70,6 +95,11 @@ func _process(delta: float) -> void:
 	if _top_up_timer <= 0.0:
 		_top_up_timer = 0.5
 		_top_up_crowd()
+	if _firing:
+		var step := fuel_step(delta, _fuel_credit, Game.tuning.burn_rate_per_second, FUEL_NET_DRAIN)
+		_fuel_credit = step[0]
+		if step[1] > 0.0:
+			player.flamethrower.add_fuel(step[1])
 	if _elapsed >= duration:
 		_finish()
 
@@ -108,10 +138,24 @@ func _build_camera() -> void:
 	_camera.name = "CaptureCamera"
 	_camera.fov = 52.0
 	add_child(_camera)
-	var anchor := player.global_position + Vector3(0.0, 1.0, -4.0)
-	_camera.global_position = player.global_position + Vector3(4.4, 2.3, 1.4)
-	_camera.look_at(anchor, Vector3.UP)
+	_cam_from = player.global_position + Vector3(4.4, 2.3, 1.4)
+	_cam_to = player.global_position + Vector3(4.8, 2.4, 2.8)
+	_look_from = player.global_position + Vector3(0.0, 1.0, -4.2)
+	_look_to = player.global_position + Vector3(0.0, 1.1, -3.6)
+	_camera.global_position = _cam_from
+	_camera.look_at(_look_from, Vector3.UP)
 	_camera.current = true
+
+
+## A fixed camera for a minute reads as a still. This eases back a metre and a
+## half so the player keeps his third of the frame while the contact zone grows.
+func _drift_camera() -> void:
+	if _camera == null:
+		return
+	var t := clampf(_elapsed / duration, 0.0, 1.0)
+	var eased := t * t * (3.0 - 2.0 * t)
+	_camera.global_position = _cam_from.lerp(_cam_to, eased)
+	_camera.look_at(_look_from.lerp(_look_to, eased), Vector3.UP)
 
 
 ## The camera sits behind the player and the flame reaches 8 m from the lens,
@@ -154,7 +198,8 @@ func _finish() -> void:
 	Input.action_release("aim")
 	var slot_hp := []
 	for holder in _slot_holders:
-		slot_hp.append(roundf(holder.hp) if is_instance_valid(holder) else null)
+		# A holder that has died or been freed counts as spent.
+		slot_hp.append(roundf(holder.hp) if (is_instance_valid(holder) and holder.alive) else 0.0)
 	var report := {
 		"timestamp": Time.get_datetime_string_from_system(true),
 		"engine": Engine.get_version_info()["string"],
@@ -168,6 +213,9 @@ func _finish() -> void:
 		"slot_hp": slot_hp,
 		"staged": true,
 		"player_invulnerable": true,
+		"fuel_top_up_rate": Game.tuning.burn_rate_per_second - FUEL_NET_DRAIN,
+		"fuel_net_drain": FUEL_NET_DRAIN,
+		"fuel_end": roundf(player.flamethrower.fuel),
 	}
 	var file := FileAccess.open(SUMMARY_PATH, FileAccess.WRITE)
 	if file != null:
