@@ -131,6 +131,7 @@ const CLIPS := {
 static var _scene_cache: Dictionary = {}
 static var _material_cache: Dictionary = {}
 static var _loops_configured: Dictionary = {}
+static var _burn_process: ParticleProcessMaterial
 
 var kind := ""
 var anim_set := ""
@@ -146,6 +147,7 @@ var _meshes: Array[MeshInstance3D] = []
 var _surface_bases: Array = []
 var _tint := Color.WHITE
 var _burning := false
+var _burn_particles: GPUParticles3D
 var _clip := ""
 var _speed := 1.0
 var _advance_accum := 0.0
@@ -224,6 +226,53 @@ func set_burning(on: bool) -> void:
 		return
 	_burning = on
 	_apply_materials()
+	if on:
+		if _burn_particles == null:
+			_build_burn_particles()
+		_burn_particles.emitting = true
+	elif _burn_particles != null:
+		# Free the emitter with the fire: 200 held emitters would cost draw
+		# calls for nothing, and a burnt body never needs a new one.
+		_burn_particles.queue_free()
+		_burn_particles = null
+
+
+func _build_burn_particles() -> void:
+	if _burn_process == null:
+		_burn_process = _make_burn_process()
+	_burn_particles = GPUParticles3D.new()
+	_burn_particles.name = "BurnParticles"
+	_burn_particles.amount = 18
+	_burn_particles.lifetime = 0.5
+	_burn_particles.local_coords = false
+	_burn_particles.position = Vector3(0.0, 0.95, 0.0)
+	_burn_particles.process_material = _burn_process
+	var quad := QuadMesh.new()
+	quad.size = Vector2(0.4, 0.4)
+	quad.material = Palette.material("flame_core")
+	_burn_particles.draw_pass_1 = quad
+	add_child(_burn_particles)
+
+
+static func _make_burn_process() -> ParticleProcessMaterial:
+	var mat := ParticleProcessMaterial.new()
+	mat.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
+	mat.emission_box_extents = Vector3(0.34, 0.7, 0.3)
+	mat.direction = Vector3(0, 1, 0)
+	mat.spread = 28.0
+	mat.initial_velocity_min = 0.5
+	mat.initial_velocity_max = 1.6
+	mat.gravity = Vector3(0, 1.4, 0)
+	mat.scale_min = 0.7
+	mat.scale_max = 1.5
+	var gradient := Gradient.new()
+	gradient.set_color(0, Color(1.0, 0.8, 0.4, 0.85))
+	gradient.set_color(1, Color(0.5, 0.1, 0.02, 0.0))
+	gradient.add_point(0.45, Color(1.0, 0.45, 0.08, 0.6))
+	var ramp := GradientTexture1D.new()
+	ramp.gradient = gradient
+	mat.color_ramp = ramp
+	return mat
 
 
 func set_tint(color: Color) -> void:
@@ -323,6 +372,7 @@ func _clear() -> void:
 	_hand = null
 	_meshes.clear()
 	_surface_bases.clear()
+	_burn_particles = null
 	_clip = ""
 	_advance_accum = 0.0
 	built = false
@@ -402,9 +452,10 @@ func _burn_material(base: Material) -> Material:
 		return _material_cache[key]
 	var copy := base.duplicate() as StandardMaterial3D
 	if copy != null:
-		copy.albedo_color = copy.albedo_color * Color(1.0, 0.55, 0.3)
-		copy.emission_enabled = true
-		copy.emission = Color(1.0, 0.25, 0.05)
-		copy.emission_energy_multiplier = 2.2
+		# Charred skin: no body-wide emission. Even 0.06 of red reads as flat
+		# red plastic at night because the scene is near black. The flame's own
+		# light and the glowing plume do the work.
+		copy.albedo_color = copy.albedo_color * Color(0.45, 0.28, 0.18)
+		copy.emission_enabled = false
 	_material_cache[key] = copy
 	return copy

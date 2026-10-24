@@ -174,12 +174,12 @@ func _build_gun() -> void:
 func _build_particles() -> void:
 	_particles = GPUParticles3D.new()
 	_particles.name = "FlameParticles"
-	_particles.amount = 42
-	_particles.lifetime = 0.55
+	_particles.amount = 90
+	_particles.lifetime = 0.75
 	_particles.local_coords = false
 	_particles.visibility_aabb = AABB(Vector3(-9, -4, -9), Vector3(18, 9, 18))
 	_particles.process_material = _flame_process_material()
-	_particles.draw_pass_1 = _particle_quad(Palette.material("flame_core"))
+	_particles.draw_pass_1 = _particle_quad(Palette.material("flame_core"), 0.42)
 	_particles.emitting = false
 	nozzle.add_child(_particles)
 
@@ -219,27 +219,34 @@ func _flicker_light(delta: float, on: bool) -> void:
 func _flame_process_material() -> ParticleProcessMaterial:
 	var mat := ParticleProcessMaterial.new()
 	mat.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
-	mat.emission_sphere_radius = 0.12
+	mat.emission_sphere_radius = 0.09
 	mat.direction = Vector3(0, 0, -1)
-	mat.spread = 7.0
-	mat.initial_velocity_min = 6.0
-	mat.initial_velocity_max = 10.0
-	mat.gravity = Vector3(0, 1.6, 0)
-	mat.damping_min = 2.0
-	mat.damping_max = 4.0
-	mat.scale_min = 0.2
-	mat.scale_max = 0.55
+	mat.spread = 12.0
+	mat.initial_velocity_min = 12.0
+	mat.initial_velocity_max = 18.0
+	mat.gravity = Vector3(0, 0.8, 0)
+	mat.damping_min = 0.5
+	mat.damping_max = 0.9
+	mat.scale_min = 0.18
+	mat.scale_max = 0.38
+	# Turbulence breaks the straight-line sheet into tongues. Without it the
+	# plume reads as a solid bar from behind the player.
+	mat.turbulence_enabled = true
+	mat.turbulence_noise_strength = 1.2
+	mat.turbulence_noise_scale = 1.8
+	mat.turbulence_influence_min = 0.05
+	mat.turbulence_influence_max = 0.16
 	var scale_curve := Curve.new()
-	scale_curve.add_point(Vector2(0.0, 1.0))
-	scale_curve.add_point(Vector2(0.35, 2.2))
+	scale_curve.add_point(Vector2(0.0, 0.6))
+	scale_curve.add_point(Vector2(0.3, 1.8))
 	scale_curve.add_point(Vector2(1.0, 0.05))
 	var scale_texture := CurveTexture.new()
 	scale_texture.curve = scale_curve
 	mat.scale_curve = scale_texture
 	var gradient := Gradient.new()
-	gradient.set_color(0, Color(1.0, 0.95, 0.7, 1.0))
-	gradient.set_color(1, Color(0.9, 0.25, 0.05, 0.0))
-	gradient.add_point(0.4, Color(1.0, 0.6, 0.15, 0.9))
+	gradient.set_color(0, Color(1.0, 0.86, 0.5, 0.9))
+	gradient.set_color(1, Color(0.35, 0.05, 0.01, 0.0))
+	gradient.add_point(0.35, Color(1.0, 0.46, 0.08, 0.75))
 	var ramp := GradientTexture1D.new()
 	ramp.gradient = gradient
 	mat.color_ramp = ramp
@@ -263,8 +270,8 @@ func _smoke_process_material() -> ParticleProcessMaterial:
 	return mat
 
 
-func _particle_quad(material: Material) -> QuadMesh:
+func _particle_quad(material: Material, size := 0.55) -> QuadMesh:
 	var quad := QuadMesh.new()
-	quad.size = Vector2(0.55, 0.55)
+	quad.size = Vector2(size, size)
 	quad.material = material
 	return quad

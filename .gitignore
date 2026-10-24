@@ -11,7 +11,9 @@ build/
 
 # Local artefacts
 perf.json
+capture.json
 !docs/evidence/perf.json
+!docs/evidence/capture.json
 raw/
 .ci/
 docs/evidence/*.tmp

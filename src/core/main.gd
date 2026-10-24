@@ -47,6 +47,7 @@ var _light_target := {
 	"energy": 0.85, "color": Palette.MOON, "pitch": -42.0, "yaw": -25.0, "fog": 0.008
 }
 var _smoke := false
+var _capture := false
 var _smoke_report := {"phases": [], "nights": [], "spawned": 0, "finished": false}
 
 
@@ -56,6 +57,7 @@ func _ready() -> void:
 		get_tree().call_deferred("change_scene_to_file", PERF_SCENE)
 		return
 	_smoke = "--smoke" in args
+	_capture = "--capture" in args
 	if _smoke:
 		_configure_smoke()
 	_build_environment()
@@ -77,6 +79,9 @@ func _ready() -> void:
 	hud.setup(player, village, director)
 	_connect_signals()
 	_apply_phase_lighting(GameClock.phase, true)
+	if _capture:
+		_start_capture()
+		return
 	GameClock.start(Game.night())
 	EventBus.toast.emit("Hold a street. The rest will burn without you.")
 	if _smoke:
@@ -89,6 +94,31 @@ func _configure_smoke() -> void:
 	Game.tuning.dusk_seconds = 1.0
 	Game.tuning.night_seconds = 6.0
 	Game.tuning.dawn_seconds = 1.0
+
+
+## Movie Maker take: night lighting, a full tank, a staged crowd and no clock.
+## The clip is produced from the real loop; see src/core/capture_rig.gd.
+func _start_capture() -> void:
+	var args := OS.get_cmdline_user_args()
+	var seconds := 8.0
+	for i in range(args.size()):
+		if args[i] == "--seconds" and i + 1 < args.size():
+			seconds = float(args[i + 1])
+	GameClock.stop()
+	GameClock.phase = GameClock.Phase.NIGHT
+	GameClock.night = Game.tuning.total_nights
+	Game.set_night(Game.tuning.total_nights)
+	director.night = Game.tuning.total_nights
+	_apply_phase_lighting(GameClock.Phase.NIGHT, true)
+	player.god_mode = true
+	player.flamethrower.setup(Game.tuning.fuel_capacity)
+	# A captured mouse would let the operator's hand move the camera mid-take.
+	if not Game.headless:
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	var rig := CaptureRig.new()
+	rig.name = "CaptureRig"
+	add_child(rig)
+	rig.setup(player, director, village, seconds)
 
 
 func _build_environment() -> void:

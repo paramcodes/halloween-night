@@ -130,6 +130,18 @@ func _drain_pending() -> void:
 		budget -= 1
 
 
+## Staged spawn: no wave budget and no edge spawner. The perf and capture
+## harnesses place the crowd themselves so the frame reflects a visible horde.
+func stage_zombie(position: Vector3, kind: int) -> Zombie:
+	var zombie: Zombie = ZOMBIE_SCENE.instantiate()
+	zombie.position = position
+	add_child(zombie)
+	zombie.setup(village, player, self, kind, Zombie.Objective.PLAYER, null)
+	zombies.append(zombie)
+	spawned_total += 1
+	return zombie
+
+
 func _spawn_one() -> void:
 	var archetype := _roll_archetype()
 	var house: House = null

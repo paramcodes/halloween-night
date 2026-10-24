@@ -18,6 +18,23 @@ const BRUTE_FLESH := Color("4b4038")
 const MOON := Color("6e8bc4")
 
 static var _cache: Dictionary = {}
+static var _puff: Texture2D
+
+
+## Soft radial alpha for particle quads. A bare quad reads as a square once the
+## plume is dense; this keeps each puff round with a feathered edge.
+static func soft_puff() -> Texture2D:
+	if _puff != null:
+		return _puff
+	var size := 64
+	var image := Image.create(size, size, false, Image.FORMAT_RGBA8)
+	for y in range(size):
+		for x in range(size):
+			var uv := (Vector2(float(x) + 0.5, float(y) + 0.5) / float(size)) - Vector2(0.5, 0.5)
+			var falloff := clampf(1.0 - uv.length() * 2.0, 0.0, 1.0)
+			image.set_pixel(x, y, Color(1.0, 1.0, 1.0, falloff * falloff))
+	_puff = ImageTexture.create_from_image(image)
+	return _puff
 
 
 static func material(key: String) -> StandardMaterial3D:
@@ -67,12 +84,6 @@ static func material(key: String) -> StandardMaterial3D:
 		"brute":
 			mat.albedo_color = BRUTE_FLESH
 			mat.roughness = 1.0
-		"zombie_burning":
-			mat.albedo_color = Color("8a3a1c")
-			mat.emission_enabled = true
-			mat.emission = Color("ff7a2a")
-			mat.emission_energy_multiplier = 2.4
-			mat.roughness = 1.0
 		"villager":
 			mat.albedo_color = BONE
 			mat.roughness = 1.0
@@ -86,16 +97,19 @@ static func material(key: String) -> StandardMaterial3D:
 			mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 			mat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
 			mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+			mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
 			mat.vertex_color_use_as_albedo = true
-			mat.albedo_color = AMBER_HOT
+			mat.albedo_texture = soft_puff()
+			mat.albedo_color = Color(1.0, 0.55, 0.2)
 			mat.emission_enabled = true
 			mat.emission = AMBER_HOT
-			mat.emission_energy_multiplier = 4.0
+			mat.emission_energy_multiplier = 1.0
 		"smoke":
 			mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 			mat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
 			mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 			mat.vertex_color_use_as_albedo = true
+			mat.albedo_texture = soft_puff()
 			mat.albedo_color = Color(0.15, 0.14, 0.13, 0.5)
 		_:
 			mat.albedo_color = Color.MAGENTA

@@ -19,6 +19,10 @@ var village: Village
 var director: NightDirector
 var target_house: House
 var home_spawn := Vector3.ZERO
+## Harness staging (perf/capture): a held body keeps its point, but still burns,
+## takes damage and dies. Never set by gameplay.
+var staged := false
+var stage_point := Vector3.ZERO
 
 var _body: CharacterVisual
 var _shape: CollisionShape3D
@@ -108,6 +112,15 @@ func is_burning() -> bool:
 	return _burn_time > 0.0
 
 
+## Holds the body at a fixed point so a capture can compose the frame. Used by
+## tools/capture.sh only; see src/core/capture_rig.gd.
+func hold_at(point: Vector3) -> void:
+	staged = true
+	stage_point = point
+	global_position = point
+	velocity = Vector3.ZERO
+
+
 func apply_burn(seconds: float) -> void:
 	if not alive:
 		return
@@ -173,6 +186,12 @@ func _physics_process(delta: float) -> void:
 	var dt := delta * _update_every
 	_tick_effects(dt)
 	if not alive:
+		return
+	if staged:
+		global_position = stage_point
+		velocity = Vector3.ZERO
+		_attack(dt)
+		_animate(dt)
 		return
 	_steer(dt)
 	move_and_slide()

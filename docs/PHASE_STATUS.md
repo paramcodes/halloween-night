@@ -50,7 +50,9 @@ Gate evidence:
   on GTX 1660 / Steam Deck class hardware. **Gate not met on this machine.**
 - CPU process p50 52.2 ms during the same run, including flamethrower VFX.
   **Gate not met on this machine.**
-- No 60 s recording of the flame feel exists. **Gate not met.**
+- No 60 s recording of the flame feel exists. An 8 s staged take exists
+  (`docs/evidence/flame_feel.mp4`, `tools/capture.sh`), but nobody has judged it
+  as reading "dangerous", and it is shorter than the gate asks. **Gate not met.**
 
 ## Phase 2
 
@@ -100,7 +102,7 @@ player.
 
 ## Phase 5
 
-Built: the feel layer from the Phase 5 animation and camera workstreams.
+Built: part of the VFX workstream, plus the animation and camera feel layer.
 
 - Camera: fire recoil rises to 1.6° and recovers when the trigger is released;
   damage shake scales with the hit, is capped at 1.4°, and never goes negative.
@@ -108,11 +110,21 @@ Built: the feel layer from the Phase 5 animation and camera workstreams.
   phase offset so identical rigs are not in lockstep, idle breathing, a distinct
   door-attack clip per archetype, and a panic gait for villagers sprinting home
   at dusk.
-- `tests/unit/polish_test.gd` locks 51 assertions; `docs/evidence/polish_failure.log`
-  proves the suite fails when an assertion is inverted.
+- VFX: the plume is a soft-puff particle stream with a bright core, turbulence and
+  a one-emitter smoke tail; burning bodies get their own ember emitter (created on
+  ignition, freed with the burn) and a charred material instead of body-wide
+  emission. See `docs/decisions/0007-capture-harness.md` for why the old look was
+  replaced.
+- Capture: `--capture` plus `tools/capture.sh` render a staged take offline through
+  Movie Maker mode. The committed take is 8 s at 30 fps, 3 kills, side camera.
+- `tests/unit/polish_test.gd` locks 51 assertions and `tests/unit/capture_test.gd`
+  locks 10. `docs/evidence/polish_failure.log` and
+  `docs/evidence/capture_failure.log` prove those suites fail when an assertion is
+  broken.
 
-Not done: VFX layers, audio, settings and remap, aim shoulder swap, death
-framing, onboarding, accessibility, optimization pass, the 90 s trailer.
+Not done: flame edge/dissipate layer split, burning props, door splinters, impact
+language, audio, settings and remap, aim shoulder swap, death framing, onboarding,
+accessibility, optimization pass, the 90 s trailer.
 
 Gate not met: no trailer cut exists and no stranger has played the build.
 
@@ -125,8 +137,9 @@ store assets.
 
 | Metric | Value | Where |
 |---|---|---|
-| Test assertions | 170/170, 0 failures | `tools/ci/check.sh` |
+| Test assertions | 183/183, 0 failures | `tools/ci/check.sh` |
 | Smoke run | 7/7 nights, victory, 64 spawned, 440 kills | `smoke.json` |
+| Capture take | 8 s, 30 fps, 241 frames, 3 kills, staged | `docs/evidence/capture.json` |
 | Perf window | 1280×720, VSync disabled | `docs/evidence/perf.json` |
 | Frame p95 | 144.5 ms (fail, hardware-bound) | `docs/evidence/perf.json` |
 | CPU process p50 | 52.2 ms (fail vs 8 ms) | `docs/evidence/perf.json` |
@@ -138,8 +151,8 @@ store assets.
 ## What blocks the next gate
 
 1. A GPU in the target class is needed to measure 16.6 ms p95 honestly.
-2. A recorded flame-feel clip is needed for Phase 1, and a 90 s trailer for
-   Phase 5.
+2. A human judgement of the flame-feel clip is needed for Phase 1, and a 90 s
+   trailer for Phase 5. The 8 s take exists; the judgement does not.
 3. Environment art, props, terrain, and lighting are needed to finish Phase 3.
 4. A human playtest is needed for Phases 2, 4, 5, and 6.
 

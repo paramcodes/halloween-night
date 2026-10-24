@@ -15,6 +15,7 @@ repository without breaking it.
 | Full gate with lint required | `tools/ci/check.sh --require-lint` |
 | Attended smoke run, all seven nights | `godot --headless --path . -- --smoke --fresh` |
 | Perf harness, windowed | `tools/perf.sh 20 4` |
+| Feel clip, 8 s at 30 fps | `DRIVER=x11 tools/capture.sh 8 30` |
 | Perf schema check only | `python3 tools/ci/check_perf.py --mode schema` |
 
 `godot --headless` skips rendering. Never report a headless frame time as a
@@ -122,3 +123,4 @@ See `docs/decisions/`:
 - ADR-0004 — perf harness stages the horde and reports hardware honestly.
 - ADR-0005 — save schema v1 and permadeath behavior.
 - ADR-0006 — KayKit rigged characters, one-surface zombies, manual animation LOD.
+- ADR-0007 — offline capture harness; staged takes are evidence, not gate passes.

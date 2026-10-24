@@ -102,6 +102,26 @@ func test_zombie_closes_on_player() -> void:
 	await _teardown()
 
 
+func test_staged_zombie_holds_its_post() -> void:
+	await _build_world()
+	var post := Vector3(6.0, 0.3, -8.0)
+	var zombie := _spawn_zombie(
+		Zombie.Archetype.SHAMBLER, Zombie.Objective.PLAYER, null, Vector3(0, 0.3, 22)
+	)
+	zombie.hold_at(post)
+	await wait_physics(180)
+	less(zombie.global_position.distance_to(post), 0.05, "a held zombie stays on its mark")
+	greater(
+		zombie.global_position.distance_to(player.global_position),
+		8.0,
+		"a held zombie does not close on the player"
+	)
+	zombie.apply_burn(3.0)
+	await wait_physics(4)
+	check(zombie.is_burning(), "a held body still burns")
+	await _teardown()
+
+
 func test_villager_shelters_at_dusk() -> void:
 	await _build_world()
 	GameClock.running = false
