@@ -13,7 +13,7 @@ Godot Engine v4.7.2.stable.arch_linux.ed1daf0bf (2026-08-17 01:18:38 UTC) - http
 [TEST] flow_field_test        10 assertions, 0 failures
 [TEST] tuning_test            32 assertions, 0 failures
 [TEST] night_test             14 assertions, 0 failures
-[TEST] 84 assertions, 0 failures, 34.3s
+[TEST] 84 assertions, 0 failures, 33.3s
 == assets ==
 assets: greybox only (no imported binaries)
   provenance ledger present: True
@@ -25,6 +25,7 @@ perf report: perf.json
   samples     75
   zombies     200/200
   frame_p95_ms         146.45  budget       16.6  FAIL
+  cpu_p50_ms            35.20  budget        8.0  FAIL
   draw_calls_p95       103.00  budget        800  PASS
   triangles_p50     172642.00  budget    1500000  PASS
   vram_mb              153.27  budget       2500  PASS
