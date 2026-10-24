@@ -1,0 +1,15 @@
+# Fresh clone verification, 2026-10-24T22:15:39+05:30
+# git clone -> import -> tests, no manual steps.
+
+[  16% ] loading_editor_layout | Loading docks...
+[ DONE ] loading_editor_layout
+
+
+Godot Engine v4.7.2.stable.arch_linux.ed1daf0bf (2026-08-17 01:18:38 UTC) - https://godotengine.org
+
+[TEST] save_test              22 assertions, 0 failures
+[TEST] utility_test           6 assertions, 0 failures
+[TEST] flow_field_test        10 assertions, 0 failures
+[TEST] tuning_test            32 assertions, 0 failures
+[TEST] night_test             14 assertions, 0 failures
+[TEST] 84 assertions, 0 failures, 34.7s

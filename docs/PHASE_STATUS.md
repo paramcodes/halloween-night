@@ -29,8 +29,10 @@ Gate evidence:
 - `tools/ci/check.sh` passes locally (import, tests, asset rules, perf schema).
 - The test gate was proven to fail: `docs/evidence/ci_failure.log` records a
   deliberately broken assertion and a non-zero exit.
-- Not met: the workflow has not run on GitHub (no remote configured), and a
-  fresh-clone build was not independently verified.
+- Fresh clone verified: `docs/evidence/fresh_clone.log` records a clean clone,
+  headless import, and 84/84 assertions with no manual steps.
+- Not met: the workflow has not run on GitHub (no remote configured), so its
+  Godot install step is unproven.
 
 ## Phase 1
 

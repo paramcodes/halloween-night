@@ -10,6 +10,7 @@ command and machine that produced it.
 | `smoke.json` | Seven-night headless smoke run: victory, phases, spawn and kill counts | `godot --headless --path . -- --smoke --fresh` |
 | `ci_failure.log` | Test run with a deliberately broken assertion, proving the gate fails | see the log header |
 | `ci_pass.log` | Full `tools/ci/check.sh` pass on the development machine | `tools/ci/check.sh` |
+| `fresh_clone.log` | Clone, headless import, and test pass from the committed tree only | `git clone` then the import and test commands |
 
 ## Reading the perf numbers
 
