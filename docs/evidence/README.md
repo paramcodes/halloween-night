@@ -16,9 +16,9 @@ command and machine that produced it.
 
 The development machine is an i3-4005U with an Intel HD 4400. It is far below
 the GTX 1660 / Steam Deck class the budget targets, and Mesa reports incomplete
-Haswell Vulkan support. The run is GPU-bound (main-thread process time is much
-lower than frame time). It fails the 16.6 ms p95 budget. This is a hardware
-result, not hidden and not excused.
+Haswell Vulkan support. Frame time p95 is 146.5 ms against a 16.6 ms budget, and
+the main-thread process median is 35.2 ms against an 8 ms budget. Both fail. This
+is a hardware result, not hidden and not excused.
 
 The measurement is still useful: it proves the horde path renders 200 bodies
 (roughly 170k triangles) and that draw calls stay far under 800. A pass on

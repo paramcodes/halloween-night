@@ -92,6 +92,7 @@ Steam integration, demo, or store assets.
 | Smoke run | 7/7 nights, victory, 64 spawned, 706 kills | `smoke.json` |
 | Perf window | 1280×720, VSync disabled | `docs/evidence/perf.json` |
 | Frame p95 | 146.5 ms (fail, hardware-bound) | `docs/evidence/perf.json` |
+| CPU process p50 | 35.2 ms (fail vs 8 ms) | `docs/evidence/perf.json` |
 | Draw calls p95 | 103 (pass) | `docs/evidence/perf.json` |
 | Triangles p50 | 172,642 (pass) | `docs/evidence/perf.json` |
 | VRAM | 153 MB (pass) | `docs/evidence/perf.json` |

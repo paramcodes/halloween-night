@@ -22,6 +22,7 @@ from pathlib import Path
 
 BUDGETS = {
     "frame_p95_ms": 16.6,
+    "cpu_p50_ms": 8.0,
     "draw_calls_p95": 800,
     "triangles_p50": 1_500_000,
     "vram_mb": 2500,
@@ -61,6 +62,7 @@ def collect(report: dict) -> tuple[dict[str, float], list[str]]:
     errors: list[str] = []
     sources = {
         "frame_p95_ms": "frame_ms.p95",
+        "cpu_p50_ms": "process_ms.p50",
         "draw_calls_p95": "draw_calls.p95",
         "triangles_p50": "triangles.p50",
         "vram_mb": "vram_mb",
