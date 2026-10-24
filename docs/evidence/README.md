@@ -52,6 +52,7 @@ the clip is not a resolution claim. `capture.json` records what happened: 241
 frames, 3 kills, GPU and engine version.
 
 The clip shows the flame reading as a stream with a bright core, embers on the
-burning bodies, and the fuel gauge draining. Whether that reads as *dangerous* is
-a human judgement and is not claimed here. Frame time is unrelated to the clip:
-the perf numbers above still fail on this machine.
+burning bodies, and the fuel gauge draining. Operator review on 2026-10-25
+judged that the flame reads. That is one human viewer judging this committed
+file; it is not a playtest and it does not touch the frame-time gate. The take
+is 8 s, so the 60 s recording the plan asks for does not exist yet.

@@ -10,7 +10,7 @@ Last updated: 2026-10-25.
 | Phase | Planned | Built | Gate met? | Status |
 |---|---|---|---|---|
 | 0 Foundation | Repo, engine, inputs, autoloads, harness, CI, tests | All of it | Partly: harness and local gate exist; no GitHub run yet | **Mostly done** |
-| 1 Vertical slice | Flame feel, 200 zombies at 60 fps | Flame, horde, camera, village, rigged characters | No: no recorded feel clip; perf fails on dev GPU | **Partial** |
+| 1 Vertical slice | Flame feel, 200 zombies at 60 fps | Flame, horde, camera, village, rigged characters | No: 8 s clip reads, but no 60 s clip; perf fails on dev GPU | **Partial** |
 | 2 Core loop | Full night loop, villagers, houses | All systems plus save/load | Partly: headless smoke run completes; no unassisted human run | **Mostly done** |
 | 3 Asset pipeline and art | Real assets, lighting, animation | Rigged character slice, pipeline, provenance, animation | No: environment and lighting still greybox | **Partial** |
 | 4 Depth and balance | Archetypes, escalation, permadeath | Archetypes, bell, save, stats, seven-night pacing | No: no balance telemetry or playtests | **Partial** |
@@ -51,8 +51,9 @@ Gate evidence:
 - CPU process p50 52.2 ms during the same run, including flamethrower VFX.
   **Gate not met on this machine.**
 - No 60 s recording of the flame feel exists. An 8 s staged take exists
-  (`docs/evidence/flame_feel.mp4`, `tools/capture.sh`), but nobody has judged it
-  as reading "dangerous", and it is shorter than the gate asks. **Gate not met.**
+  (`docs/evidence/flame_feel.mp4`, `tools/capture.sh`), and the operator judged
+  on 2026-10-25 that the flame reads. The take is shorter than the gate asks, so
+  the length requirement is open. **Gate not met.**
 
 ## Phase 2
 
@@ -116,7 +117,8 @@ Built: part of the VFX workstream, plus the animation and camera feel layer.
   emission. See `docs/decisions/0007-capture-harness.md` for why the old look was
   replaced.
 - Capture: `--capture` plus `tools/capture.sh` render a staged take offline through
-  Movie Maker mode. The committed take is 8 s at 30 fps, 3 kills, side camera.
+  Movie Maker mode. The committed take is 8 s at 30 fps, 3 kills, side camera. The
+  operator judged the flame reads; the 90 s trailer is still unbuilt.
 - `tests/unit/polish_test.gd` locks 51 assertions and `tests/unit/capture_test.gd`
   locks 10. `docs/evidence/polish_failure.log` and
   `docs/evidence/capture_failure.log` prove those suites fail when an assertion is
@@ -151,8 +153,9 @@ store assets.
 ## What blocks the next gate
 
 1. A GPU in the target class is needed to measure 16.6 ms p95 honestly.
-2. A human judgement of the flame-feel clip is needed for Phase 1, and a 90 s
-   trailer for Phase 5. The 8 s take exists; the judgement does not.
+2. A 60 s recording of the flame is needed for Phase 1 (the 8 s take reads but is
+   short), and a 90 s trailer for Phase 5. The 60 s take needs staged refuelling:
+   a full tank is 16.6 s of fire.
 3. Environment art, props, terrain, and lighting are needed to finish Phase 3.
 4. A human playtest is needed for Phases 2, 4, 5, and 6.
 
