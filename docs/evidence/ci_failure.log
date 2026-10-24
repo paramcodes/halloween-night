@@ -1,0 +1,23 @@
+# Deliberate gate proof, generated 2026-10-24T22:08:58+05:30
+# Mutation: tests/unit/tuning_test.gd expects 8 nights instead of 7.
+# Expected and observed: tools/ci/check.sh exits non-zero.
+
+== godot ==
+4.7.2.stable.arch_linux.ed1daf0bf
+== import ==
+== format ==
+29 files would be left unchanged
+== lint ==
+Success: no problems found
+== tests ==
+Godot Engine v4.7.2.stable.arch_linux.ed1daf0bf (2026-08-17 01:18:38 UTC) - https://godotengine.org
+
+[TEST] save_test              22 assertions, 0 failures
+[TEST] utility_test           6 assertions, 0 failures
+[TEST] flow_field_test        10 assertions, 0 failures
+[TEST] tuning_test            32 assertions, 1 failures
+[TEST] night_test             14 assertions, 0 failures
+[TEST] 84 assertions, 1 failures, 33.8s
+[FAIL] tuning_test: seven nights (expected 8, got 7)
+
+EXIT_CODE=1

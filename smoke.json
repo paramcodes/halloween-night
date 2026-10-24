@@ -1,0 +1,30 @@
+{
+	"alive_zombies": 0,
+	"finished": true,
+	"nights": [
+		1,
+		2,
+		3,
+		4,
+		5,
+		6,
+		7
+	],
+	"phases": [
+		"Dusk",
+		"Night",
+		"Dawn",
+		"Day"
+	],
+	"reason": "night 7 reached",
+	"spawned": 64,
+	"summary": {
+		"doors_lost": 0,
+		"fuel_spent": 0.0,
+		"kills": 440,
+		"night": 7,
+		"nights_survived": 7,
+		"villagers_lost": 0
+	},
+	"victory": true
+}
