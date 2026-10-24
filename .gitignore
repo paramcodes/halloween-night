@@ -1,0 +1,20 @@
+# Godot 4
+.godot/
+*.translation
+export.cfg
+export_presets.cfg
+build/
+*.tmp
+
+# Imports are generated; sources are committed.
+*.import
+
+# Local artefacts
+perf.json
+raw/
+.ci/
+docs/evidence/*.tmp
+*.log
+!docs/evidence/*.log
+__pycache__/
+.venv/
