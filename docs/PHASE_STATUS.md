@@ -14,7 +14,7 @@ Last updated: 2026-10-25.
 | 2 Core loop | Full night loop, villagers, houses | All systems plus save/load | Partly: headless smoke run completes; no unassisted human run | **Mostly done** |
 | 3 Asset pipeline and art | Real assets, lighting, animation | Rigged character slice, pipeline, provenance, animation | No: environment and lighting still greybox | **Partial** |
 | 4 Depth and balance | Archetypes, escalation, permadeath | Archetypes, bell, save, stats, seven-night pacing | No: no balance telemetry or playtests | **Partial** |
-| 5 Polish | VFX, audio, animation, UI, post | HUD, flame VFX, character animation | No | **Not started** |
+| 5 Polish | VFX, audio, animation, UI, post | Camera and animation feedback | No | **Partial** |
 | 6 Ship | Cert, Steam, demo | None | No | **Not started** |
 
 ## Phase 0
@@ -31,7 +31,7 @@ Gate evidence:
   deliberately broken assertion and a non-zero exit.
 - Fresh clone verified: `docs/evidence/fresh_clone.log` records a clean clone,
   headless import, and the full assertion count at the time of the clone. The
-  current suite is 119/119.
+  current suite is 170/170.
 - Not met: the workflow has not run on GitHub (no remote configured), so its
   Godot install step is unproven.
 
@@ -98,17 +98,35 @@ Not done: balance telemetry, difficulty curves from real runs, multiple save
 slots, accessibility options. No evidence that seven nights feel different to a
 player.
 
-## Phases 5 and 6
+## Phase 5
 
-Not started. No audio, controller support, export presets, Steam integration,
-demo, or store assets. Character animation exists, but there is no polish pass.
+Built: the feel layer from the Phase 5 animation and camera workstreams.
+
+- Camera: fire recoil rises to 1.6° and recovers when the trigger is released;
+  damage shake scales with the hit, is capped at 1.4°, and never goes negative.
+- Animation: per-spawn gait variation seeded from the director RNG, a walk-cycle
+  phase offset so identical rigs are not in lockstep, idle breathing, a distinct
+  door-attack clip per archetype, and a panic gait for villagers sprinting home
+  at dusk.
+- `tests/unit/polish_test.gd` locks 51 assertions; `docs/evidence/polish_failure.log`
+  proves the suite fails when an assertion is inverted.
+
+Not done: VFX layers, audio, settings and remap, aim shoulder swap, death
+framing, onboarding, accessibility, optimization pass, the 90 s trailer.
+
+Gate not met: no trailer cut exists and no stranger has played the build.
+
+## Phase 6
+
+Not started. No controller support, export presets, Steam integration, demo, or
+store assets.
 
 ## Measured evidence
 
 | Metric | Value | Where |
 |---|---|---|
-| Test assertions | 119/119, 0 failures | `tools/ci/check.sh` |
-| Smoke run | 7/7 nights, victory, 160 spawned, 944 kills | `smoke.json` |
+| Test assertions | 170/170, 0 failures | `tools/ci/check.sh` |
+| Smoke run | 7/7 nights, victory, 64 spawned, 440 kills | `smoke.json` |
 | Perf window | 1280×720, VSync disabled | `docs/evidence/perf.json` |
 | Frame p95 | 144.5 ms (fail, hardware-bound) | `docs/evidence/perf.json` |
 | CPU process p50 | 52.2 ms (fail vs 8 ms) | `docs/evidence/perf.json` |
@@ -120,8 +138,9 @@ demo, or store assets. Character animation exists, but there is no polish pass.
 ## What blocks the next gate
 
 1. A GPU in the target class is needed to measure 16.6 ms p95 honestly.
-2. A recorded flame-feel clip is needed for Phase 1.
+2. A recorded flame-feel clip is needed for Phase 1, and a 90 s trailer for
+   Phase 5.
 3. Environment art, props, terrain, and lighting are needed to finish Phase 3.
-4. A human playtest is needed for Phases 2, 4, and 5.
+4. A human playtest is needed for Phases 2, 4, 5, and 6.
 
 None of these can be replaced by more code, and none should be reported as done.

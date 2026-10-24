@@ -2,7 +2,7 @@
 4.7.2.stable.arch_linux.ed1daf0bf
 == import ==
 == format ==
-31 files would be left unchanged
+33 files would be left unchanged
 == lint ==
 Success: no problems found
 == tests ==
@@ -13,8 +13,9 @@ Godot Engine v4.7.2.stable.arch_linux.ed1daf0bf (2026-08-17 01:18:38 UTC) - http
 [TEST] flow_field_test        10 assertions, 0 failures
 [TEST] tuning_test            32 assertions, 0 failures
 [TEST] character_test         35 assertions, 0 failures
+[TEST] polish_test            51 assertions, 0 failures
 [TEST] night_test             14 assertions, 0 failures
-[TEST] 119 assertions, 0 failures, 33.9s
+[TEST] 170 assertions, 0 failures, 36.0s
 == assets ==
 assets: 16 imported binaries
 OK

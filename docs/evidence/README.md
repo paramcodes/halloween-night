@@ -9,6 +9,7 @@ command and machine that produced it.
 | `perf.json` | Frame time, draw calls, triangles, VRAM, engine/GPU/window for the same 60 s run | `tools/perf.sh 60 5` |
 | `smoke.json` | Seven-night headless smoke run: victory, phases, spawn and kill counts | `godot --headless --path . -- --smoke --fresh` |
 | `ci_failure.log` | Test run with a deliberately broken assertion, proving the gate fails | see the log header |
+| `polish_failure.log` | Same proof for the Phase 5 feel suite: one assertion inverted, runner exits 1, then reverted | see the log header |
 | `ci_pass.log` | Full `tools/ci/check.sh` pass on the development machine | `tools/ci/check.sh` |
 | `fresh_clone.log` | Clone, headless import, and test pass from the committed tree only | `git clone` then the import and test commands |
 

@@ -26,6 +26,7 @@ var stuck_time := 0.0
 var stuck_events := 0
 var threat := 0.0
 var decisions := 0
+var panicking := false
 
 var village: Village
 var director: NightDirector
@@ -73,6 +74,13 @@ func _build_visual(tint: int) -> void:
 		return
 	var kind: String = VISUAL_KINDS[posmod(tint, VISUAL_KINDS.size())]
 	_body.setup(kind, "villager")
+	(
+		_body
+		. set_gait(
+			Feedback.gait_scale(float(posmod(tint, 7)) / 7.0, Game.tuning.gait_variation),
+			float(posmod(tint, 5)) / 5.0,
+		)
+	)
 	collision_layer = 8
 	collision_mask = 1 | 16
 
@@ -131,6 +139,9 @@ func animate_gait(delta: float) -> void:
 	if _body == null:
 		return
 	var speed := Vector2(velocity.x, velocity.z).length()
+	panicking = (
+		state == State.FLEE or (state == State.TO_HOME and GameClock.phase == GameClock.Phase.DUSK)
+	)
 	var animation := "idle"
 	if state == State.WORK:
 		animation = "work"
@@ -138,7 +149,12 @@ func animate_gait(delta: float) -> void:
 		animation = "run"
 	elif speed > 0.15:
 		animation = "walk"
-	_body.play_state(animation, 0.18, clampf(speed / WALK_SPEED, 0.7, 1.4))
+	var playback := clampf(speed / WALK_SPEED, 0.7, 1.4)
+	if panicking:
+		playback *= 1.18
+	elif animation == "idle":
+		playback = Feedback.breath_speed(Time.get_ticks_msec(), _body.gait_phase, Game.tuning)
+	_body.play_state(animation, 0.18, playback)
 	if speed > 0.15:
 		var target_yaw := atan2(velocity.x, velocity.z) - rotation.y
 		_body.rotation.y = lerp_angle(_body.rotation.y, target_yaw, 1.0 - exp(-delta / 0.16))
@@ -152,6 +168,9 @@ func animate_gait(delta: float) -> void:
 
 func _think() -> void:
 	if dead:
+		return
+	if village == null:
+		velocity = Vector3.ZERO
 		return
 	var phase := GameClock.phase
 	var shelter_window := phase != GameClock.Phase.DAY

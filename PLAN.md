@@ -273,7 +273,7 @@ Five playtesters, 20 min each, no guidance. Every one reaches night 3. At least 
 
 ### Workstreams
 
-- [ ] **Animation** (highest leverage): zombie gait variation, flinch, door attack, villager panic run, player fire recoil, idle breathing
+- [x] **Animation** (highest leverage): zombie gait variation, flinch, door attack, villager panic run, player fire recoil, idle breathing
 - [ ] **VFX**: flame core/edge/dissipate layers, embers, smoke, burning props, door splinters, blood-free impact language
 - [ ] **Audio**: 3 ambience beds with crossfaded dusk transition, distance-filtered moans (max 8 voices), flame loop with intensity parameter, bell, door stress creaks
 - [ ] **UI/UX**: fuel as a diegetic gauge plus HUD fallback, door health readability, night counter, dawn tally, settings, remap

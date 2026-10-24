@@ -22,6 +22,7 @@ var _target_pitch := -0.08
 var _coyote := 0.0
 var _exhausted := false
 var _shake := 0.0
+var _recoil := 0.0
 var _interact_cooldown := 0.0
 var _hit_timer := 0.0
 
@@ -62,7 +63,10 @@ func take_damage(amount: float) -> void:
 	if not alive or amount <= 0.0 or god_mode:
 		return
 	health = maxf(0.0, health - amount)
-	_shake = minf(0.35, _shake + amount * 0.004)
+	_shake = minf(
+		Game.tuning.camera_shake_max_deg,
+		_shake + Feedback.shake_amplitude(amount, Game.tuning),
+	)
 	_hit_timer = 0.22
 	EventBus.player_damaged.emit(health, max_health)
 	if health <= 0.0:
@@ -167,20 +171,31 @@ func _process(delta: float) -> void:
 	var target_position := Vector3(tuning.shoulder_offset, tuning.pivot_height, 0.0)
 	var pos_smoothing := 1.0 - exp(-delta / maxf(0.001, tuning.position_smoothing))
 	pivot.position = pivot.position.lerp(target_position, pos_smoothing)
-	var shake := Vector2.ZERO
-	if _shake > 0.0:
-		_shake = maxf(0.0, _shake - delta * 1.6)
-		shake = Vector2(
-			_shake * sin(Time.get_ticks_msec() * 0.07), _shake * cos(Time.get_ticks_msec() * 0.09)
-		)
-	pivot.rotation += Vector3(shake.y, shake.x, 0.0)
 	var target_boom := tuning.boom_length_aim if aiming else tuning.boom_length
 	spring.spring_length = lerpf(spring.spring_length, target_boom, pos_smoothing)
 	var target_fov := tuning.fov_aim if aiming else tuning.fov
 	camera.fov = lerpf(camera.fov, target_fov, pos_smoothing)
 	flamethrower.firing = Input.is_action_pressed("fire")
+	apply_feedback(delta, flamethrower.firing)
+	pivot.rotation += Feedback.shake_rotation(_shake, Time.get_ticks_msec())
+	pivot.rotation.x -= deg_to_rad(_recoil)
 	_update_interaction(delta)
 	_update_body_animation(delta)
+
+
+## Camera feedback is separated from input so tests can drive it directly.
+func apply_feedback(delta: float, firing: bool) -> void:
+	var tuning := Game.tuning
+	_recoil = Feedback.recoil_step(_recoil, firing, delta, tuning)
+	_shake = Feedback.shake_step(_shake, delta, tuning)
+
+
+func camera_recoil_degrees() -> float:
+	return _recoil
+
+
+func camera_shake_degrees() -> float:
+	return _shake
 
 
 func _update_interaction(delta: float) -> void:
@@ -277,5 +292,14 @@ func _update_body_animation(delta: float) -> void:
 				"walk", 0.15, clampf(horizontal / Game.tuning.walk_speed, 0.7, 1.35)
 			)
 		else:
-			body_visual.play_state("idle", 0.2)
+			(
+				body_visual
+				. play_state(
+					"idle",
+					0.2,
+					Feedback.breath_speed(
+						Time.get_ticks_msec(), body_visual.gait_phase, Game.tuning
+					),
+				)
+			)
 	body_visual.tick(delta, 0)

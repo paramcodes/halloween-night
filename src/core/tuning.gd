@@ -35,6 +35,17 @@ extends Resource
 @export var fov := 65.0
 @export var fov_aim := 72.0
 
+@export_group("Feedback")
+@export var fire_recoil_deg := 1.6
+@export var fire_recoil_attack := 9.0
+@export var fire_recoil_recover := 4.5
+@export var camera_shake_max_deg := 1.4
+@export var camera_shake_per_damage := 0.02
+@export var camera_shake_decay := 2.2
+@export var gait_variation := 0.12
+@export var idle_breath_amount := 0.06
+@export var idle_breath_period := 3.8
+
 @export_group("Flamethrower")
 @export var fuel_capacity := 100.0
 @export var burn_rate_per_second := 6.0

@@ -70,6 +70,8 @@ const LOOPING := [
 	"Blocking",
 ]
 
+const DESYNC_STATES := ["walk", "run"]
+
 const CLIPS := {
 	"player":
 	{
@@ -97,6 +99,7 @@ const CLIPS := {
 		"walk": "Walking_D_Skeletons",
 		"run": "Walking_C",
 		"attack": "Unarmed_Melee_Attack_Punch_A",
+		"door": "2H_Melee_Attack_Chop",
 		"lunge": "Unarmed_Melee_Attack_Punch_B",
 		"hit": "Hit_A",
 		"death": "Death_C_Skeletons",
@@ -107,6 +110,7 @@ const CLIPS := {
 		"walk": "Walking_C",
 		"run": "Running_A",
 		"attack": "1H_Melee_Attack_Slice_Diagonal",
+		"door": "1H_Melee_Attack_Chop",
 		"lunge": "1H_Melee_Attack_Jump_Chop",
 		"hit": "Hit_A",
 		"death": "Death_C_Skeletons",
@@ -117,6 +121,7 @@ const CLIPS := {
 		"walk": "Walking_B",
 		"run": "Walking_B",
 		"attack": "2H_Melee_Attack_Chop",
+		"door": "2H_Melee_Attack_Spinning",
 		"lunge": "2H_Melee_Attack_Chop",
 		"hit": "Hit_A",
 		"death": "Death_C_Skeletons",
@@ -130,6 +135,8 @@ static var _loops_configured: Dictionary = {}
 var kind := ""
 var anim_set := ""
 var built := false
+var gait_scale := 1.0
+var gait_phase := 0.0
 
 var _model: Node3D
 var _skeleton: Skeleton3D
@@ -161,7 +168,7 @@ func play_state(state: String, blend := 0.18, speed := 1.0, restart := false) ->
 	var clip := clip_for(state)
 	if clip.is_empty() or _player == null:
 		return
-	_speed = speed
+	_speed = speed * gait_scale
 	if clip == _clip and not restart:
 		return
 	_clip = clip
@@ -169,12 +176,14 @@ func play_state(state: String, blend := 0.18, speed := 1.0, restart := false) ->
 	if restart:
 		_player.stop()
 	_player.play(clip, blend)
+	if gait_phase > 0.0 and DESYNC_STATES.has(state):
+		_player.seek(gait_phase * _player.get_animation(clip).length, true)
 
 
 func play_clip(clip: String, blend := 0.18, speed := 1.0, restart := false) -> void:
 	if _player == null or not _player.has_animation(clip):
 		return
-	_speed = speed
+	_speed = speed * gait_scale
 	if clip == _clip and not restart:
 		return
 	_clip = clip
@@ -182,6 +191,17 @@ func play_clip(clip: String, blend := 0.18, speed := 1.0, restart := false) -> v
 	if restart:
 		_player.stop()
 	_player.play(clip, blend)
+
+
+## Deterministic per-actor gait: playback spread keeps a horde out of lockstep,
+## and the phase offset desyncs identical walk cycles.
+func set_gait(scale: float, phase := 0.0) -> void:
+	gait_scale = clampf(scale, 0.5, 1.5)
+	gait_phase = fposmod(phase, 1.0)
+
+
+func playback_speed() -> float:
+	return _speed
 
 
 func tick(delta: float, lod: int) -> void:

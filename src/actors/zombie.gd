@@ -29,6 +29,7 @@ var _lunge_time := 0.0
 var _lunge_cooldown := 0.0
 var _flinch := 0.0
 var _attack_anim := 0.0
+var _attacking_door := false
 var _update_every := 1
 var _frame_offset := 0
 var _anim_lod := 0
@@ -93,6 +94,13 @@ func _apply_archetype() -> void:
 			speed = tuning.zombie_speed
 	if _body != null:
 		_body.setup(visual_kind, visual_kind, tint)
+		var roll := director.rng.randf() if director != null else 0.5
+		var spread := tuning.gait_variation
+		if archetype == Archetype.RUNNER:
+			spread *= 1.3
+		elif archetype == Archetype.BRUTE:
+			spread *= 0.6
+		_body.set_gait(Feedback.gait_scale(roll, spread), roll)
 	max_hp = hp
 
 
@@ -198,6 +206,8 @@ func _tick_effects(dt: float) -> void:
 		_flinch -= dt
 	if _attack_anim > 0.0:
 		_attack_anim -= dt
+		if _attack_anim <= 0.0:
+			_attacking_door = false
 	if is_burning():
 		_burn_time -= dt
 		_burn_accumulator += dt
@@ -267,12 +277,14 @@ func _attack(dt: float) -> void:
 	if to_player.length() <= Game.tuning.zombie_attack_range and _attack_cooldown <= 0.0:
 		_attack_cooldown = 1.0
 		_attack_anim = 0.5
+		_attacking_door = false
 		player.take_damage(Game.tuning.zombie_attack_dps)
 		return
 	var victim := director.nearest_villager(global_position, 1.4) if director != null else null
 	if victim != null and _attack_cooldown <= 0.0:
 		_attack_cooldown = 1.0
 		_attack_anim = 0.5
+		_attacking_door = false
 		victim.kill("zombie")
 		return
 	if objective == Objective.PLAYER:
@@ -286,6 +298,7 @@ func _attack_door(_dt: float, door: Door) -> void:
 		return
 	_attack_cooldown = 1.0
 	_attack_anim = 0.5
+	_attacking_door = true
 	var damage := Game.tuning.zombie_door_dps
 	if archetype == Archetype.BRUTE:
 		damage *= Game.tuning.brute_door_multiplier
@@ -316,7 +329,7 @@ func _animate(dt: float) -> void:
 	var horizontal := Vector2(velocity.x, velocity.z).length()
 	var state := "idle"
 	if _attack_anim > 0.0:
-		state = "attack"
+		state = "door" if _attacking_door else "attack"
 	elif _lunge_time > 0.0:
 		state = "lunge"
 	elif _flinch > 0.0:
@@ -324,6 +337,8 @@ func _animate(dt: float) -> void:
 	elif horizontal > 0.2:
 		state = "run" if archetype == Archetype.RUNNER else "walk"
 	var playback := clampf(horizontal / maxf(0.1, speed), 0.65, 1.35)
+	if state == "idle":
+		playback = Feedback.breath_speed(Time.get_ticks_msec(), _body.gait_phase, Game.tuning)
 	_body.play_state(state, 0.18, playback)
 	var look := Vector3.ZERO
 	if horizontal > 0.2:

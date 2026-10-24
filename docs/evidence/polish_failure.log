@@ -1,0 +1,21 @@
+# Deliberate failure proof: polish suite
+
+Command: `godot --headless --path . res://tests/test_runner.tscn`
+Machine: the i3-4005U / Intel HD 4400 development machine, same as `ci_pass.log`.
+Date: 2026-10-25.
+
+One assertion in `tests/unit/polish_test.gd` was changed from
+
+```gdscript
+almost(recoil, 0.0, 0.0001, "recoil never goes below zero")
+```
+
+to expect `1.0` instead of `0.0`. The runner exited 1:
+
+```
+[TEST] polish_test            51 assertions, 1 failures
+[TEST] 170 assertions, 1 failures, 36.8s
+[FAIL] polish_test: PROOF: recoil never goes below zero (expected 1.000 +/- 0.000, got 0.000)
+```
+
+The assertion was reverted, and the same command then passes 170/170.
