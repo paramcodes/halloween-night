@@ -23,8 +23,9 @@ var _coyote := 0.0
 var _exhausted := false
 var _shake := 0.0
 var _interact_cooldown := 0.0
+var _hit_timer := 0.0
 
-@onready var body_visual: MeshInstance3D = $Body
+@onready var body_visual: CharacterVisual = $Body
 @onready var pivot: Node3D = $CameraPivot
 @onready var spring: SpringArm3D = $CameraPivot/SpringArm3D
 @onready var camera: Camera3D = $CameraPivot/SpringArm3D/Camera3D
@@ -36,9 +37,8 @@ func _ready() -> void:
 	max_health = tuning.player_max_hp
 	health = max_health
 	stamina = tuning.sprint_stamina_seconds
-	body_visual.mesh = MeshFactory.humanoid("player")
-	body_visual.material_override = Palette.material("player")
-	body_visual.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	body_visual.setup("player")
+	body_visual.rotation.y = PI
 	pivot.position = Vector3(tuning.shoulder_offset, tuning.pivot_height, 0)
 	spring.spring_length = tuning.boom_length
 	spring.margin = 0.15
@@ -63,6 +63,7 @@ func take_damage(amount: float) -> void:
 		return
 	health = maxf(0.0, health - amount)
 	_shake = minf(0.35, _shake + amount * 0.004)
+	_hit_timer = 0.22
 	EventBus.player_damaged.emit(health, max_health)
 	if health <= 0.0:
 		alive = false
@@ -149,8 +150,15 @@ func _physics_process(delta: float) -> void:
 
 
 func _process(delta: float) -> void:
-	if not alive or not controls_enabled:
+	if not alive:
 		flamethrower.firing = false
+		body_visual.play_state("death", 0.12)
+		body_visual.tick(delta, 0)
+		return
+	if not controls_enabled:
+		flamethrower.firing = false
+		body_visual.play_state("idle")
+		body_visual.tick(delta, 0)
 		return
 	var tuning := Game.tuning
 	_yaw = lerp_angle(_yaw, _target_yaw, 1.0 - exp(-delta / maxf(0.001, tuning.rotation_smoothing)))
@@ -172,6 +180,7 @@ func _process(delta: float) -> void:
 	camera.fov = lerpf(camera.fov, target_fov, pos_smoothing)
 	flamethrower.firing = Input.is_action_pressed("fire")
 	_update_interaction(delta)
+	_update_body_animation(delta)
 
 
 func _update_interaction(delta: float) -> void:
@@ -236,9 +245,37 @@ func _find_door() -> Door:
 
 
 func _rotate_visual(direction: Vector3, delta: float) -> void:
-	if direction.length_squared() < 0.02:
+	var facing := direction
+	if aiming:
+		facing = Basis(Vector3.UP, _yaw) * Vector3(0.0, 0.0, -1.0)
+	if facing.length_squared() < 0.02:
 		return
-	var target_yaw := atan2(direction.x, direction.z)
+	var target_yaw := atan2(facing.x, facing.z) - rotation.y
 	body_visual.rotation.y = lerp_angle(
 		body_visual.rotation.y, target_yaw, 1.0 - exp(-delta / 0.12)
 	)
+
+
+func _update_body_animation(delta: float) -> void:
+	if _hit_timer > 0.0:
+		_hit_timer = maxf(0.0, _hit_timer - delta)
+		body_visual.play_state("hit", 0.08)
+	elif interact_progress > 0.0 and Input.is_action_pressed("interact"):
+		body_visual.play_state("interact", 0.15)
+	elif flamethrower.firing:
+		body_visual.play_state("fire", 0.12)
+	elif aiming:
+		body_visual.play_state("aim", 0.15)
+	else:
+		var horizontal := Vector2(velocity.x, velocity.z).length()
+		if horizontal > 3.1:
+			body_visual.play_state(
+				"run", 0.15, clampf(horizontal / Game.tuning.sprint_speed, 0.75, 1.35)
+			)
+		elif horizontal > 0.2:
+			body_visual.play_state(
+				"walk", 0.15, clampf(horizontal / Game.tuning.walk_speed, 0.7, 1.35)
+			)
+		else:
+			body_visual.play_state("idle", 0.2)
+	body_visual.tick(delta, 0)

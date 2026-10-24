@@ -87,7 +87,11 @@ func _place_gun() -> void:
 	if holder == null:
 		return
 	var forward := -camera.global_transform.basis.z
-	nozzle.global_position = holder.global_position + Vector3(0.0, 1.15, 0.0) + forward * 0.35
+	var visual := holder.get_node_or_null("Body") as CharacterVisual
+	if visual != null and visual.has_hand():
+		nozzle.global_position = visual.hand_position() + forward * 0.12
+	else:
+		nozzle.global_position = holder.global_position + Vector3(0.0, 1.15, 0.0) + forward * 0.35
 	nozzle.global_rotation = camera.global_rotation
 
 
@@ -158,12 +162,12 @@ func _build_gun() -> void:
 	var barrel := MeshInstance3D.new()
 	barrel.mesh = MeshFactory.box(Vector3(0.1, 0.1, 0.72))
 	barrel.material_override = Palette.material("stone")
-	barrel.position = Vector3(0.22, -0.2, -0.55)
+	barrel.position = Vector3(0.0, 0.0, -0.38)
 	nozzle.add_child(barrel)
 	var tank := MeshInstance3D.new()
 	tank.mesh = MeshFactory.box(Vector3(0.16, 0.26, 0.3))
 	tank.material_override = Palette.material("wood")
-	tank.position = Vector3(0.28, -0.3, -0.28)
+	tank.position = Vector3(0.06, -0.12, 0.02)
 	nozzle.add_child(tank)
 
 

@@ -5,8 +5,8 @@ command and machine that produced it.
 
 | File | What it is | How to reproduce |
 |---|---|---|
-| `perf_frame.png` | 200-zombie stress run, 1280×720, night lighting, horde staged in front of the player | `tools/perf.sh 10 3` |
-| `perf.json` | Frame time, draw calls, triangles, VRAM, engine/GPU/window for the same run | `tools/perf.sh 10 3` |
+| `perf_frame.png` | 200-zombie stress run, 1280×720, night lighting, horde staged in front of the player, flamethrower firing | `tools/perf.sh 60 5` |
+| `perf.json` | Frame time, draw calls, triangles, VRAM, engine/GPU/window for the same 60 s run | `tools/perf.sh 60 5` |
 | `smoke.json` | Seven-night headless smoke run: victory, phases, spawn and kill counts | `godot --headless --path . -- --smoke --fresh` |
 | `ci_failure.log` | Test run with a deliberately broken assertion, proving the gate fails | see the log header |
 | `ci_pass.log` | Full `tools/ci/check.sh` pass on the development machine | `tools/ci/check.sh` |
@@ -16,13 +16,14 @@ command and machine that produced it.
 
 The development machine is an i3-4005U with an Intel HD 4400. It is far below
 the GTX 1660 / Steam Deck class the budget targets, and Mesa reports incomplete
-Haswell Vulkan support. Frame time p95 is 146.5 ms against a 16.6 ms budget, and
-the main-thread process median is 35.2 ms against an 8 ms budget. Both fail. This
-is a hardware result, not hidden and not excused.
+Haswell Vulkan support. Frame time p95 is 144.5 ms against a 16.6 ms budget, and
+the main-thread process median is 52.2 ms against an 8 ms budget. Both fail. This
+is a hardware result, not hidden and not excused. The process median includes the
+flamethrower VFX; the GPU stalls before the main thread can finish the frame.
 
-The measurement is still useful: it proves the horde path renders 200 bodies
-(roughly 170k triangles) and that draw calls stay far under 800. A pass on
-reference hardware remains a required Phase 1 gate.
+The measurement is still useful: it proves the horde path renders 200 rigged
+skeletons (344.7k triangles after LOD) and that draw calls stay far under 800
+(p95 496). A pass on reference hardware remains a required Phase 1 gate.
 
 The staged horde is made fireproof for the run. The flamethrower still fires and
 its particles and light still cost frame time, but kills would otherwise burn

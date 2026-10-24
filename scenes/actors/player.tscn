@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://src/actors/player.gd" id="1_player"]
 [ext_resource type="Script" path="res://src/combat/flamethrower.gd" id="2_flame"]
+[ext_resource type="Script" path="res://src/actors/character_visual.gd" id="3_visual"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_player"]
 radius = 0.35
@@ -18,7 +19,8 @@ script = ExtResource("1_player")
 position = Vector3(0, 0.9, 0)
 shape = SubResource("CapsuleShape3D_player")
 
-[node name="Body" type="MeshInstance3D" parent="."]
+[node name="Body" type="Node3D" parent="."]
+script = ExtResource("3_visual")
 
 [node name="CameraPivot" type="Node3D" parent="."]
 

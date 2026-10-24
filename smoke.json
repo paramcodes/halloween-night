@@ -17,11 +17,11 @@
 		"Day"
 	],
 	"reason": "night 7 reached",
-	"spawned": 64,
+	"spawned": 160,
 	"summary": {
 		"doors_lost": 0,
 		"fuel_spent": 0.0,
-		"kills": 440,
+		"kills": 944,
 		"night": 7,
 		"nights_survived": 7,
 		"villagers_lost": 0

@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://src/actors/villager.gd" id="1_villager"]
+[ext_resource type="Script" path="res://src/actors/character_visual.gd" id="2_visual"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_villager"]
 radius = 0.32
@@ -16,4 +17,5 @@ script = ExtResource("1_villager")
 position = Vector3(0, 0.85, 0)
 shape = SubResource("CapsuleShape3D_villager")
 
-[node name="Body" type="MeshInstance3D" parent="."]
+[node name="Body" type="Node3D" parent="."]
+script = ExtResource("2_visual")

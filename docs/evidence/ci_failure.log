@@ -1,12 +1,12 @@
-# Deliberate gate proof, generated 2026-10-24T22:08:58+05:30
-# Mutation: tests/unit/tuning_test.gd expects 8 nights instead of 7.
+# Deliberate gate proof, generated 2026-10-25T00:21:55+05:30
+# Mutation: tests/unit/character_test.gd expects a nonexistent player walk clip.
 # Expected and observed: tools/ci/check.sh exits non-zero.
 
 == godot ==
 4.7.2.stable.arch_linux.ed1daf0bf
 == import ==
 == format ==
-29 files would be left unchanged
+31 files would be left unchanged
 == lint ==
 Success: no problems found
 == tests ==
@@ -15,9 +15,10 @@ Godot Engine v4.7.2.stable.arch_linux.ed1daf0bf (2026-08-17 01:18:38 UTC) - http
 [TEST] save_test              22 assertions, 0 failures
 [TEST] utility_test           6 assertions, 0 failures
 [TEST] flow_field_test        10 assertions, 0 failures
-[TEST] tuning_test            32 assertions, 1 failures
+[TEST] tuning_test            32 assertions, 0 failures
+[TEST] character_test         35 assertions, 1 failures
 [TEST] night_test             14 assertions, 0 failures
-[TEST] 84 assertions, 1 failures, 33.8s
-[FAIL] tuning_test: seven nights (expected 8, got 7)
+[TEST] 119 assertions, 1 failures, 34.0s
+[FAIL] character_test: player walk clip (expected Not_A_Real_Clip, got Walking_A)
 
-EXIT_CODE=1
+# check.sh exit=1

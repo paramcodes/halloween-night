@@ -12,6 +12,7 @@ const WALK_SPEED := 1.25
 const PANIC_SPEED := 3.6
 const THREAT_RADIUS := 22.0
 const STUCK_LIMIT := 5.0
+const VISUAL_KINDS := ["villager_a", "villager_b", "villager_c", "villager_d"]
 
 var display_name := "Villager"
 var home: House
@@ -29,7 +30,7 @@ var decisions := 0
 var village: Village
 var director: NightDirector
 
-var _body: MeshInstance3D
+var _body: CharacterVisual
 var _shape: CollisionShape3D
 var _think_timer := 0.0
 var _stuck_timer := 0.0
@@ -42,7 +43,7 @@ var _sidestep := 1.0
 
 
 func _ready() -> void:
-	_body = get_node_or_null("Body") as MeshInstance3D
+	_body = get_node_or_null("Body") as CharacterVisual
 	_shape = get_node_or_null("CollisionShape3D") as CollisionShape3D
 	_last_position = global_position
 
@@ -70,9 +71,8 @@ func setup(
 func _build_visual(tint: int) -> void:
 	if _body == null:
 		return
-	_body.mesh = MeshFactory.humanoid("villager")
-	_body.material_override = Palette.material("villager" if tint % 2 == 0 else "villager_alt")
-	_body.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	var kind: String = VISUAL_KINDS[posmod(tint, VISUAL_KINDS.size())]
+	_body.setup(kind, "villager")
 	collision_layer = 8
 	collision_mask = 1 | 16
 
@@ -100,18 +100,20 @@ func kill(_reason: String) -> void:
 	Game.add_stat("villagers_lost", 1)
 	died.emit(self)
 	if _body != null:
-		_body.visible = false
+		_body.play_state("death", 0.08, 1.0, true)
 	collision_layer = 0
 	collision_mask = 0
 	if _shape != null:
 		_shape.set_deferred("disabled", true)
 	var tween := create_tween()
-	tween.tween_interval(0.05)
+	tween.tween_interval(1.0)
 	tween.tween_callback(queue_free)
 
 
 func _physics_process(delta: float) -> void:
 	if dead:
+		if _body != null:
+			_body.tick(delta, 0)
 		return
 	_think_timer -= delta
 	if _think_timer <= 0.0:
@@ -129,9 +131,23 @@ func animate_gait(delta: float) -> void:
 	if _body == null:
 		return
 	var speed := Vector2(velocity.x, velocity.z).length()
-	_gait += delta * (2.0 + speed * 2.5)
-	_body.position.y = absf(sin(_gait)) * 0.05
-	_body.rotation.z = sin(_gait * 0.5) * 0.04
+	var animation := "idle"
+	if state == State.WORK:
+		animation = "work"
+	elif speed > 2.0:
+		animation = "run"
+	elif speed > 0.15:
+		animation = "walk"
+	_body.play_state(animation, 0.18, clampf(speed / WALK_SPEED, 0.7, 1.4))
+	if speed > 0.15:
+		var target_yaw := atan2(velocity.x, velocity.z) - rotation.y
+		_body.rotation.y = lerp_angle(_body.rotation.y, target_yaw, 1.0 - exp(-delta / 0.16))
+	elif state == State.WORK:
+		var to_work := job_position - global_position
+		if to_work.length_squared() > 0.04:
+			var work_yaw := atan2(to_work.x, to_work.z) - rotation.y
+			_body.rotation.y = lerp_angle(_body.rotation.y, work_yaw, 1.0 - exp(-delta / 0.25))
+	_body.tick(delta, 0)
 
 
 func _think() -> void:

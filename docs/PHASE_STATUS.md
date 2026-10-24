@@ -3,18 +3,18 @@
 Plan: `PLAN.md`. This file is the honest plan-versus-built matrix. A phase is
 done only when its gate is measured, not when the code exists.
 
-Last updated: 2026-10-24.
+Last updated: 2026-10-25.
 
 ## Summary
 
 | Phase | Planned | Built | Gate met? | Status |
 |---|---|---|---|---|
 | 0 Foundation | Repo, engine, inputs, autoloads, harness, CI, tests | All of it | Partly: harness and local gate exist; no GitHub run yet | **Mostly done** |
-| 1 Vertical slice | Flame feel, 200 zombies at 60 fps | Flame, horde, camera, village | No: no recorded feel clip; perf fails on dev GPU | **Partial** |
+| 1 Vertical slice | Flame feel, 200 zombies at 60 fps | Flame, horde, camera, village, rigged characters | No: no recorded feel clip; perf fails on dev GPU | **Partial** |
 | 2 Core loop | Full night loop, villagers, houses | All systems plus save/load | Partly: headless smoke run completes; no unassisted human run | **Mostly done** |
-| 3 Asset pipeline and art | Real assets, lighting, animation | Pipeline scripts and provenance ledger only | No | **Not started** |
+| 3 Asset pipeline and art | Real assets, lighting, animation | Rigged character slice, pipeline, provenance, animation | No: environment and lighting still greybox | **Partial** |
 | 4 Depth and balance | Archetypes, escalation, permadeath | Archetypes, bell, save, stats, seven-night pacing | No: no balance telemetry or playtests | **Partial** |
-| 5 Polish | VFX, audio, animation, UI, post | HUD and some flame VFX | No | **Not started** |
+| 5 Polish | VFX, audio, animation, UI, post | HUD, flame VFX, character animation | No | **Not started** |
 | 6 Ship | Cert, Steam, demo | None | No | **Not started** |
 
 ## Phase 0
@@ -30,7 +30,8 @@ Gate evidence:
 - The test gate was proven to fail: `docs/evidence/ci_failure.log` records a
   deliberately broken assertion and a non-zero exit.
 - Fresh clone verified: `docs/evidence/fresh_clone.log` records a clean clone,
-  headless import, and 84/84 assertions with no manual steps.
+  headless import, and the full assertion count at the time of the clone. The
+  current suite is 119/119.
 - Not met: the workflow has not run on GitHub (no remote configured), so its
   Godot install step is unproven.
 
@@ -42,10 +43,13 @@ DoT for 3 s, 100 fuel at 6/s; 200-zombie cap; flow-field pathing; distance LOD;
 burn deaths; night lighting; perf harness that stages the horde in view.
 
 Gate evidence:
-- Horde renders: about 172k triangles (p50) and 200 alive at the end of the run.
-- Draw calls p95 about 103, far under the 800 budget.
-- Frame time p95 146.5 ms at 1280×720 on an Intel HD 4400. Budget is 16.6 ms
+- Horde renders: 200 rigged skeletons, 344.7k triangles (p50) after LOD, and
+  200 alive at the end of the run.
+- Draw calls p95 496, under the 800 budget.
+- Frame time p95 144.5 ms at 1280×720 on an Intel HD 4400. Budget is 16.6 ms
   on GTX 1660 / Steam Deck class hardware. **Gate not met on this machine.**
+- CPU process p50 52.2 ms during the same run, including flamethrower VFX.
+  **Gate not met on this machine.**
 - No 60 s recording of the flame feel exists. **Gate not met.**
 
 ## Phase 2
@@ -64,10 +68,25 @@ Gate evidence:
 
 ## Phase 3
 
-Not started. `assets/` is empty; `docs/provenance.csv` has a header and no rows.
-`tools/pipeline/` contains a Blender cleaner, a gltf-transform wrapper, and a
-manifest builder, none exercised against real files. The lighting and greybox
-palette are deliberate placeholders, not an art pass.
+Character slice complete; environment not started. Eight rigged KayKit models
+(Knight, four adventurer villagers, three skeleton archetypes) are imported with
+76/95-clip animation libraries. `tools/pipeline/blender_character.py` merges the
+skinned meshes, strips weapons and accessories, and puts each skeleton on one
+surface. `CharacterVisual` drives clip mapping, manual animation LOD, tints,
+burn material, and the hand bone used by the flamethrower.
+
+Evidence:
+- `assets/manifest.json` and `docs/provenance.csv` cover all 16 binary files
+  (eight GLBs and eight extracted textures), all CC0-1.0.
+- `tools/ci/check_assets.py` passes: every character is under the 20k triangle
+  class budget. Zombie meshes are one surface and at most 5,288 triangles.
+- `tests/unit/character_test.gd` locks 35 assertions: clip mapping, LOD freeze,
+  triangle budget, one-surface zombies, and hand attachment.
+- `docs/decisions/0006-rigged-characters.md` records the pipeline and the
+  deliberate deviation from one shared animation library.
+
+Not done: 25 hero props, 25 filler props, modular village kit, terrain, lighting,
+and the final art pass. The village is still the procedural greybox.
 
 ## Phase 4
 
@@ -81,28 +100,28 @@ player.
 
 ## Phases 5 and 6
 
-Not started. No audio, animation clips, controller support, export presets,
-Steam integration, demo, or store assets.
+Not started. No audio, controller support, export presets, Steam integration,
+demo, or store assets. Character animation exists, but there is no polish pass.
 
 ## Measured evidence
 
 | Metric | Value | Where |
 |---|---|---|
-| Test assertions | see latest `docs/evidence/ci_pass.log` | test runner |
-| Smoke run | 7/7 nights, victory, 64 spawned, 706 kills | `smoke.json` |
+| Test assertions | 119/119, 0 failures | `tools/ci/check.sh` |
+| Smoke run | 7/7 nights, victory, 160 spawned, 944 kills | `smoke.json` |
 | Perf window | 1280×720, VSync disabled | `docs/evidence/perf.json` |
-| Frame p95 | 146.5 ms (fail, hardware-bound) | `docs/evidence/perf.json` |
-| CPU process p50 | 35.2 ms (fail vs 8 ms) | `docs/evidence/perf.json` |
-| Draw calls p95 | 103 (pass) | `docs/evidence/perf.json` |
-| Triangles p50 | 172,642 (pass) | `docs/evidence/perf.json` |
-| VRAM | 153 MB (pass) | `docs/evidence/perf.json` |
-| Screenshot | staged horde at night | `docs/evidence/perf_frame.png` |
+| Frame p95 | 144.5 ms (fail, hardware-bound) | `docs/evidence/perf.json` |
+| CPU process p50 | 52.2 ms (fail vs 8 ms) | `docs/evidence/perf.json` |
+| Draw calls p95 | 496 (pass) | `docs/evidence/perf.json` |
+| Triangles p50 | 344,699 (pass) | `docs/evidence/perf.json` |
+| VRAM | 206 MB (pass) | `docs/evidence/perf.json` |
+| Screenshot | staged skeleton horde and flame at night | `docs/evidence/perf_frame.png` |
 
 ## What blocks the next gate
 
 1. A GPU in the target class is needed to measure 16.6 ms p95 honestly.
 2. A recorded flame-feel clip is needed for Phase 1.
-3. Art direction and imported assets are needed for Phase 3.
+3. Environment art, props, terrain, and lighting are needed to finish Phase 3.
 4. A human playtest is needed for Phases 2, 4, and 5.
 
 None of these can be replaced by more code, and none should be reported as done.

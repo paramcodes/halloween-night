@@ -20,18 +20,15 @@ var director: NightDirector
 var target_house: House
 var home_spawn := Vector3.ZERO
 
-var _body: MeshInstance3D
+var _body: CharacterVisual
 var _shape: CollisionShape3D
-var _base_material: Material
-var _burn_material: Material
 var _burn_time := 0.0
 var _burn_accumulator := 0.0
 var _attack_cooldown := 0.0
 var _lunge_time := 0.0
 var _lunge_cooldown := 0.0
 var _flinch := 0.0
-var _gait := 0.0
-var _gait_phase := 0.0
+var _attack_anim := 0.0
 var _update_every := 1
 var _frame_offset := 0
 var _anim_lod := 0
@@ -41,13 +38,10 @@ var _separation_seed := 0.0
 
 
 func _ready() -> void:
-	_body = get_node_or_null("Body") as MeshInstance3D
+	_body = get_node_or_null("Body") as CharacterVisual
 	_shape = get_node_or_null("CollisionShape3D") as CollisionShape3D
-	_base_material = Palette.material("zombie")
-	_burn_material = Palette.material("zombie_burning")
 	_last_position = global_position
 	_separation_seed = randf() * TAU
-	_gait_phase = randf() * TAU
 	_anim_lod = 0
 
 
@@ -74,21 +68,19 @@ func setup(
 
 func _apply_archetype() -> void:
 	var tuning := Game.tuning
+	var visual_kind := "shambler"
+	var tint := Color(0.92, 1.0, 0.9)
 	match archetype:
 		Archetype.RUNNER:
 			hp = tuning.runner_hp
 			speed = tuning.runner_speed
-			_base_material = Palette.material("runner")
-			if _body != null:
-				_body.mesh = MeshFactory.humanoid("runner")
-				_body.material_override = _base_material
+			visual_kind = "runner"
+			tint = Color(0.88, 0.94, 1.0)
 		Archetype.BRUTE:
 			hp = tuning.brute_hp
 			speed = tuning.brute_speed
-			_base_material = Palette.material("brute")
-			if _body != null:
-				_body.mesh = MeshFactory.humanoid("brute")
-				_body.material_override = _base_material
+			visual_kind = "brute"
+			tint = Color(1.0, 0.88, 0.82)
 			if _shape != null:
 				_shape.shape = _shape.shape.duplicate()
 				var capsule := _shape.shape as CapsuleShape3D
@@ -99,10 +91,8 @@ func _apply_archetype() -> void:
 		_:
 			hp = tuning.zombie_hp
 			speed = tuning.zombie_speed
-			_base_material = Palette.material("zombie")
-			if _body != null:
-				_body.mesh = MeshFactory.humanoid("zombie")
-				_body.material_override = _base_material
+	if _body != null:
+		_body.setup(visual_kind, visual_kind, tint)
 	max_hp = hp
 
 
@@ -115,7 +105,7 @@ func apply_burn(seconds: float) -> void:
 		return
 	_burn_time = maxf(_burn_time, seconds)
 	if _body != null:
-		_body.material_override = _burn_material
+		_body.set_burning(true)
 
 
 func take_damage(amount: float) -> void:
@@ -132,7 +122,7 @@ func dawn_die() -> void:
 		return
 	_burn_time = 2.0
 	if _body != null:
-		_body.material_override = _burn_material
+		_body.set_burning(true)
 	_die()
 
 
@@ -150,19 +140,26 @@ func _die() -> void:
 		director.on_zombie_died(self)
 	died.emit(self)
 	if _body != null:
+		_body.play_state("death", 0.08, 1.0, true)
 		var tween := create_tween()
-		tween.tween_property(_body, "scale", Vector3(1.6, 0.05, 1.6), 0.5)
-		tween.parallel().tween_property(_body, "position:y", _body.position.y - 0.1, 0.5)
-		tween.tween_interval(0.35)
+		tween.tween_interval(0.55)
+		tween.tween_property(_body, "scale", Vector3(1.35, 0.04, 1.35), 0.3)
+		tween.parallel().tween_property(_body, "position:y", _body.position.y - 0.08, 0.3)
 		tween.tween_callback(queue_free)
 	else:
 		queue_free()
 
 
 func _physics_process(delta: float) -> void:
-	if not alive or player == null or village == null:
+	if not alive:
+		if _body != null:
+			_body.tick(delta, 0)
+		return
+	if player == null or village == null:
 		return
 	_update_lod()
+	if _body != null:
+		_body.tick(delta, _anim_lod)
 	if _update_every > 1 and (Engine.get_physics_frames() + _frame_offset) % _update_every != 0:
 		return
 	var dt := delta * _update_every
@@ -199,6 +196,8 @@ func _tick_effects(dt: float) -> void:
 		_lunge_time -= dt
 	if _flinch > 0.0:
 		_flinch -= dt
+	if _attack_anim > 0.0:
+		_attack_anim -= dt
 	if is_burning():
 		_burn_time -= dt
 		_burn_accumulator += dt
@@ -211,8 +210,8 @@ func _tick_effects(dt: float) -> void:
 				return
 	else:
 		_burn_accumulator = 0.0
-		if _body != null and _body.material_override != _base_material:
-			_body.material_override = _base_material
+		if _body != null:
+			_body.set_burning(false)
 
 
 func _steer(dt: float) -> void:
@@ -267,11 +266,13 @@ func _attack(dt: float) -> void:
 	to_player.y = 0.0
 	if to_player.length() <= Game.tuning.zombie_attack_range and _attack_cooldown <= 0.0:
 		_attack_cooldown = 1.0
+		_attack_anim = 0.5
 		player.take_damage(Game.tuning.zombie_attack_dps)
 		return
 	var victim := director.nearest_villager(global_position, 1.4) if director != null else null
 	if victim != null and _attack_cooldown <= 0.0:
 		_attack_cooldown = 1.0
+		_attack_anim = 0.5
 		victim.kill("zombie")
 		return
 	if objective == Objective.PLAYER:
@@ -284,6 +285,7 @@ func _attack_door(_dt: float, door: Door) -> void:
 	if _attack_cooldown > 0.0:
 		return
 	_attack_cooldown = 1.0
+	_attack_anim = 0.5
 	var damage := Game.tuning.zombie_door_dps
 	if archetype == Archetype.BRUTE:
 		damage *= Game.tuning.brute_door_multiplier
@@ -311,13 +313,25 @@ func _check_stuck(dt: float) -> void:
 func _animate(dt: float) -> void:
 	if _body == null:
 		return
-	if _anim_lod >= 2:
-		return
 	var horizontal := Vector2(velocity.x, velocity.z).length()
-	_gait += dt * (2.0 + horizontal * 2.2)
-	var bob := absf(sin(_gait + _gait_phase)) * 0.07
-	_body.position.y = bob
-	_body.rotation.z = sin(_gait * 0.5 + _gait_phase) * 0.06
-	_body.rotation.x = -0.12 if _lunge_time > 0.0 else 0.0
-	if _anim_lod == 1 and Engine.get_physics_frames() % 2 == 0:
-		return
+	var state := "idle"
+	if _attack_anim > 0.0:
+		state = "attack"
+	elif _lunge_time > 0.0:
+		state = "lunge"
+	elif _flinch > 0.0:
+		state = "hit"
+	elif horizontal > 0.2:
+		state = "run" if archetype == Archetype.RUNNER else "walk"
+	var playback := clampf(horizontal / maxf(0.1, speed), 0.65, 1.35)
+	_body.play_state(state, 0.18, playback)
+	var look := Vector3.ZERO
+	if horizontal > 0.2:
+		look = Vector3(velocity.x, 0.0, velocity.z)
+	elif objective == Objective.HOUSE and target_house != null and target_house.door != null:
+		look = target_house.door.global_position - global_position
+	elif player != null:
+		look = player.global_position - global_position
+	if look.length_squared() > 0.04:
+		var target_yaw := atan2(look.x, look.z) - rotation.y
+		_body.rotation.y = lerp_angle(_body.rotation.y, target_yaw, 1.0 - exp(-dt / 0.14))

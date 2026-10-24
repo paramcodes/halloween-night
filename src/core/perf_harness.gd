@@ -47,7 +47,10 @@ func _ready() -> void:
 	director.night = 7
 	_fill_horde()
 	_stage_horde()
-	player.flamethrower.firing = true
+	# The player rewrites `firing` from the input map every frame, so press the
+	# action instead of setting the boolean. This keeps the flame VFX in the
+	# measured load.
+	Input.action_press("fire")
 	if not Game.headless:
 		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 		DisplayServer.window_set_size(Vector2i(1280, 720))
@@ -123,6 +126,9 @@ func _stage_horde() -> void:
 		# which turns a render benchmark into a spawn-rate benchmark.
 		zombie.max_hp = 1.0e9
 		zombie.hp = 1.0e9
+		# Hold the staged ring: a walking horde collapses onto the player in a
+		# few seconds and turns the sample into a close-up of a dozen bodies.
+		zombie.speed = 0.0
 
 
 func _process(delta: float) -> void:

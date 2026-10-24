@@ -121,3 +121,4 @@ See `docs/decisions/`:
 - ADR-0003 — procedural greybox, no downloaded dataset, no volumetric fog.
 - ADR-0004 — perf harness stages the horde and reports hardware honestly.
 - ADR-0005 — save schema v1 and permadeath behavior.
+- ADR-0006 — KayKit rigged characters, one-surface zombies, manual animation LOD.

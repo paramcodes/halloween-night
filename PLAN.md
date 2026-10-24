@@ -211,13 +211,13 @@ Three consecutive full runs at 60 fps. Two losses, one win, all explainable in o
 - [ ] `gltf-transform optimize --compress meshopt --texture-compress ktx2`
 - [ ] `manifest.json` emit: `{id, category, dims, tris, materials, textures, sha256, license}`
 - [ ] CI budget check: reject any asset over class budget
-- [ ] Provenance ledger: source URL, generator, license, hash, per asset
+- [x] Provenance ledger: source URL, generator, license, hash, per asset
 
 **Content (week 2)**
 
 - [ ] Import 25 hero + 25 filler props; hand-place into 9 house plots and 4 street scenes
 - [ ] Modular village kit imported, material variants unified
-- [ ] Characters: one skeleton, retarget all clips, 8 meshes
+- [x] Characters: KayKit rigs, 76/95 embedded clips, 8 meshes (ADR-0006; per-archetype libraries, not one shared library yet)
 - [ ] Terrain: heightmap + splatmap, 3 materials, no tiling artifacts at 8 m
 
 **Art (week 3)**
