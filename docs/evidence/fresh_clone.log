@@ -1,9 +1,173 @@
-# Fresh clone verification, 2026-10-24T22:15:39+05:30
-# git clone -> import -> tests, no manual steps.
+# Fresh clone verification, 2026-10-25T00:23:49+05:30
+# git clone -> headless import -> tests, no manual steps.
+# Source commit: 945d0ed
 
+Godot Engine v4.7.2.stable.arch_linux.ed1daf0bf (2026-08-17 01:18:38 UTC) - https://godotengine.org
+
+[   0% ] first_scan_filesystem | Started Project initialization (5 steps)
+[   0% ] first_scan_filesystem | Scanning file structure...
+[  16% ] first_scan_filesystem | Loading global class names...
+[  33% ] first_scan_filesystem | Verifying GDExtensions...
+[  50% ] first_scan_filesystem | Creating autoload scripts...
+[  66% ] first_scan_filesystem | Initializing plugins...
+[  83% ] first_scan_filesystem | Starting file scan...
+[ DONE ] first_scan_filesystem
+
+[   0% ] update_scripts_classes | Started Registering global classes... (31 steps)
+[   0% ] update_scripts_classes | CharacterVisual
+[   3% ] update_scripts_classes | Player
+[   6% ] update_scripts_classes | Villager
+[   9% ] update_scripts_classes | Zombie
+[  12% ] update_scripts_classes | FlowField
+[  15% ] update_scripts_classes | UtilityBrain
+[  18% ] update_scripts_classes | Flamethrower
+[  21% ] update_scripts_classes | 
+[  25% ] update_scripts_classes | 
+[  28% ] update_scripts_classes | 
+[  31% ] update_scripts_classes | 
+[  34% ] update_scripts_classes | MeshFactory
+[  37% ] update_scripts_classes | NightDirector
+[  40% ] update_scripts_classes | Palette
+[  43% ] update_scripts_classes | 
+[  46% ] update_scripts_classes | SaveData
+[  50% ] update_scripts_classes | 
+[  53% ] update_scripts_classes | Tuning
+[  56% ] update_scripts_classes | Hud
+[  59% ] update_scripts_classes | Door
+[  62% ] update_scripts_classes | House
+[  65% ] update_scripts_classes | Village
+[  68% ] update_scripts_classes | 
+[  71% ] update_scripts_classes | TestCase
+[  75% ] update_scripts_classes | 
+[  78% ] update_scripts_classes | 
+[  81% ] update_scripts_classes | 
+[  84% ] update_scripts_classes | 
+[  87% ] update_scripts_classes | 
+[  90% ] update_scripts_classes | 
+[  93% ] update_scripts_classes | 
+[ DONE ] update_scripts_classes
+
+[   0% ] _update_scan_actions | Started Scanning actions... (19 steps)
+[   0% ] _update_scan_actions | Barbarian.glb
+[   5% ] _update_scan_actions | Barbarian_barbarian_texture.png
+[  10% ] _update_scan_actions | Knight.glb
+[  15% ] _update_scan_actions | Knight_knight_texture.png
+[  20% ] _update_scan_actions | Mage.glb
+[  25% ] _update_scan_actions | Mage_mage_texture.png
+[  30% ] _update_scan_actions | Rogue.glb
+[  35% ] _update_scan_actions | Rogue_Hooded.glb
+[  40% ] _update_scan_actions | Rogue_Hooded_rogue_texture.png
+[  45% ] _update_scan_actions | Rogue_rogue_texture.png
+[  50% ] _update_scan_actions | Skeleton_Minion.glb
+[  55% ] _update_scan_actions | Skeleton_Minion_skeleton_texture.png
+[  60% ] _update_scan_actions | Skeleton_Rogue.glb
+[  65% ] _update_scan_actions | Skeleton_Rogue_skeleton_texture.png
+[  70% ] _update_scan_actions | Skeleton_Warrior.glb
+[  75% ] _update_scan_actions | Skeleton_Warrior_skeleton_texture.png
+[  80% ] _update_scan_actions | perf_frame.png
+[  85% ] _update_scan_actions | provenance.csv
+[  90% ] _update_scan_actions | icon.svg
+[ DONE ] _update_scan_actions
+
+[   0% ] reimport | Started (Re)Importing Assets (19 steps)
+[   0% ] reimport | Preparing files to reimport...
+[   5% ] reimport | Preparing files to reimport...
+[  10% ] reimport | Preparing files to reimport...
+[  15% ] reimport | Preparing files to reimport...
+[  20% ] reimport | Preparing files to reimport...
+[  25% ] reimport | Preparing files to reimport...
+[  30% ] reimport | Preparing files to reimport...
+[  35% ] reimport | Preparing files to reimport...
+[  40% ] reimport | Preparing files to reimport...
+[  45% ] reimport | Preparing files to reimport...
+[  50% ] reimport | Preparing files to reimport...
+[  55% ] reimport | Preparing files to reimport...
+[  60% ] reimport | Preparing files to reimport...
+[  65% ] reimport | Preparing files to reimport...
+[  70% ] reimport | Preparing files to reimport...
+[  75% ] reimport | Preparing files to reimport...
+[  80% ] reimport | Preparing files to reimport...
+[  85% ] reimport | Preparing files to reimport...
+[  90% ] reimport | Preparing files to reimport...
+[   0% ] reimport | Executing pre-reimport operations...
+[   0% ] reimport | provenance.csv
+[   5% ] reimport | provenance.csv
+[  10% ] reimport | icon.svg
+[  15% ] reimport | perf_frame.png
+[  20% ] reimport | Skeleton_Warrior_skeleton_texture.png
+[  25% ] reimport | Skeleton_Rogue_skeleton_texture.png
+[  30% ] reimport | Skeleton_Minion_skeleton_texture.png
+[  35% ] reimport | Rogue_rogue_texture.png
+[  40% ] reimport | Rogue_Hooded_rogue_texture.png
+[  45% ] reimport | Mage_mage_texture.png
+[  50% ] reimport | Knight_knight_texture.png
+[  55% ] reimport | Rogue_Hooded.glb
+[   0% ] import | Started Import Scene (104 steps)
+[   0% ] import | Importing Scene...
+[   1% ] import | Running Custom Script...
+[  99% ] import | Saving...
+[ DONE ] import
+
+[  60% ] reimport | Rogue.glb
+[   0% ] import | Started Import Scene (104 steps)
+[   0% ] import | Importing Scene...
+[   1% ] import | Running Custom Script...
+[  99% ] import | Saving...
+[ DONE ] import
+
+[  65% ] reimport | Skeleton_Minion.glb
+[   0% ] import | Started Import Scene (104 steps)
+[   0% ] import | Importing Scene...
+[   1% ] import | Running Custom Script...
+[  99% ] import | Saving...
+[ DONE ] import
+
+[  70% ] reimport | Skeleton_Rogue.glb
+[   0% ] import | Started Import Scene (104 steps)
+[   0% ] import | Importing Scene...
+[   1% ] import | Running Custom Script...
+[  99% ] import | Saving...
+[ DONE ] import
+
+[  75% ] reimport | Mage.glb
+[   0% ] import | Started Import Scene (104 steps)
+[   0% ] import | Importing Scene...
+[   1% ] import | Running Custom Script...
+[  99% ] import | Saving...
+[ DONE ] import
+
+[  80% ] reimport | Skeleton_Warrior.glb
+[   0% ] import | Started Import Scene (104 steps)
+[   0% ] import | Importing Scene...
+[   1% ] import | Running Custom Script...
+[  99% ] import | Saving...
+[ DONE ] import
+
+[  85% ] reimport | Knight.glb
+[   0% ] import | Started Import Scene (104 steps)
+[   0% ] import | Importing Scene...
+[   1% ] import | Running Custom Script...
+[  99% ] import | Saving...
+[ DONE ] import
+
+[  90% ] reimport | Barbarian.glb
+[   0% ] import | Started Import Scene (104 steps)
+[   0% ] import | Importing Scene...
+[   1% ] import | Running Custom Script...
+[  99% ] import | Saving...
+[ DONE ] import
+
+[  95% ] reimport | Finalizing Asset Import...
+[ DONE ] reimport
+
+[   0% ] reimport | Started (Re)Importing Assets (19 steps)
+[   0% ] reimport | Executing post-reimport operations...
+[ DONE ] reimport
+
+[   0% ] loading_editor_layout | Started Loading editor (5 steps)
+[   0% ] loading_editor_layout | Loading editor layout...
 [  16% ] loading_editor_layout | Loading docks...
 [ DONE ] loading_editor_layout
-
 
 Godot Engine v4.7.2.stable.arch_linux.ed1daf0bf (2026-08-17 01:18:38 UTC) - https://godotengine.org
 
@@ -11,5 +175,6 @@ Godot Engine v4.7.2.stable.arch_linux.ed1daf0bf (2026-08-17 01:18:38 UTC) - http
 [TEST] utility_test           6 assertions, 0 failures
 [TEST] flow_field_test        10 assertions, 0 failures
 [TEST] tuning_test            32 assertions, 0 failures
+[TEST] character_test         35 assertions, 0 failures
 [TEST] night_test             14 assertions, 0 failures
-[TEST] 84 assertions, 0 failures, 34.7s
+[TEST] 119 assertions, 0 failures, 34.1s
