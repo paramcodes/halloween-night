@@ -51,8 +51,8 @@ Gate evidence:
 - CPU process p50 52.2 ms during the same run, including flamethrower VFX.
   **Gate not met on this machine.**
 - A 60 s recording of the flame feel exists: `docs/evidence/flame_feel.mp4`,
-  1801 frames at 30 fps, flame lit for the whole clip (fuel 14 of 100 at cut),
-  34 kills, slow camera drift; provenance in `docs/evidence/capture.json`
+  1801 frames at 30 fps, flame lit for the whole clip (fuel 0 of 100 at cut),
+  32 kills, slow camera drift; provenance in `docs/evidence/capture.json`
   (`staged: true`, `player_invulnerable: true`). The operator judged the 8 s
   take reads on 2026-10-25; the 60 s take is the same composition. The length
   requirement is now met. **Gate still not met on frame time (see below).**

@@ -67,7 +67,8 @@ the 16.6 ms budget; the measurement and the hardware are recorded in
 - 7-night loop with dusk choices, dawn tally, save/load, permadeath, HUD.
 - Headless test suite (187 assertions), smoke run, perf harness, strict perf
   checker, CI workflow, offline capture harness for feel clips.
-- 60 s and 90 s staged feel takes committed in `docs/evidence/`.
+- 60 s and 90 s staged feel takes committed in `docs/evidence/` (flame lit to the
+  cut in both).
 
 ## What is not
 
