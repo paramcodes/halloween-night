@@ -14,7 +14,7 @@ Last updated: 2026-10-25.
 | 2 Core loop | Full night loop, villagers, houses | All systems plus save/load | Partly: headless smoke run completes; no unassisted human run | **Mostly done** |
 | 3 Asset pipeline and art | Real assets, lighting, animation | Rigged character slice, pipeline, provenance, animation | No: environment and lighting still greybox | **Partial** |
 | 4 Depth and balance | Archetypes, escalation, permadeath | Archetypes, bell, save, stats, seven-night pacing | No: no balance telemetry or playtests | **Partial** |
-| 5 Polish | VFX, audio, animation, UI, post | Camera and animation feedback | No | **Partial** |
+| 5 Polish | VFX, audio, animation, UI, post | Camera and animation feedback, flame edge layer, 90 s trailer | No: no balance telemetry or playtests; trailer exists | **Partial** |
 | 6 Ship | Cert, Steam, demo | None | No | **Not started** |
 
 ## Phase 0
@@ -119,9 +119,9 @@ Built: part of the VFX workstream, plus the animation and camera feel layer.
   emission. See `docs/decisions/0007-capture-harness.md` for why the old look was
   replaced.
 - Capture: `--capture` plus `tools/capture.sh` render a staged take offline through
-  Movie Maker mode. A 60 s take is committed (`docs/evidence/flame_feel.mp4`,
-  1801 frames, 34 kills, side camera with a slow drift); the 90 s trailer is
-  still unbuilt.
+  Movie Maker mode. 60 s (`docs/evidence/flame_feel.mp4`) and 90 s
+  (`docs/evidence/flame_feel_90s.mp4`) takes are committed; the 90 s take is the
+  Phase 5 trailer artifact (flame lit for 87 s).
 - `tests/unit/polish_test.gd` locks 51 assertions and `tests/unit/capture_test.gd`
   locks 10. `docs/evidence/polish_failure.log` and
   `docs/evidence/capture_failure.log` prove those suites fail when an assertion is
@@ -156,9 +156,8 @@ store assets.
 ## What blocks the next gate
 
 1. A GPU in the target class is needed to measure 16.6 ms p95 honestly.
-2. A 60 s recording of the flame now exists (`docs/evidence/flame_feel.mp4`).
-   A 90 s trailer is still needed for Phase 5, and the Phase 1 frame-time gate
-   needs reference hardware.
+2. A 90 s trailer now exists (`docs/evidence/flame_feel_90s.mp4`). The Phase 1
+   frame-time gate still needs reference hardware.
 3. Environment art, props, terrain, and lighting are needed to finish Phase 3.
 4. A human playtest is needed for Phases 2, 4, 5, and 6.
 

@@ -13,13 +13,6 @@ extends Node
 const CROWD_SIZE := 40
 const SUMMARY_PATH := "res://capture.json"
 const SEED := 20251025
-## A full tank is 16.6 s of fire, so a 60 s take would go dark after a quarter of
-## the clip. The rig tops the tank up at the burn rate minus FUEL_NET_DRAIN, so
-## the gauge drains slowly for the whole take instead of emptying at 17 s.
-const FUEL_NET_DRAIN := 1.5
-## Top-ups are applied once they reach this many units of fuel, which keeps the
-## HUD from publishing every frame without changing the rate.
-const FUEL_STEP := 0.5
 ## Lane slots in front of the player: x is lateral, y is forward distance.
 ## One body per slot, so burning targets never stack on the same point.
 const CONTACT_SLOTS := [Vector2(-1.6, 4.4), Vector2(-0.1, 4.9), Vector2(1.4, 4.5)]
@@ -33,7 +26,9 @@ var _elapsed := 0.0
 var _frames := 0
 var _contact_timer := 0.0
 var _top_up_timer := 0.0
-var _fuel_credit := 0.0
+## Default net drain for a short take; `setup()` overrides it per-take so a 90 s
+## trailer does not go dark at 67 s.
+var _fuel_net_drain := 1.5
 var _firing := false
 var _rng := RandomNumberGenerator.new()
 var _kills_at_start := 0.0
@@ -53,6 +48,12 @@ func setup(target: Player, horde: NightDirector, world: Village, seconds: float)
 	_rng.seed = SEED
 	director.rng.seed = SEED
 	_kills_at_start = Game.stat("kills")
+	# Drain the tank over the take so the gauge reads as fuel economy instead of
+	# a flat full bar (short take) or an empty one (long take).
+	var fire_seconds := maxf(1.0, duration - 0.8 - 1.8)
+	_fuel_net_drain = clampf(
+		Game.tuning.fuel_capacity / fire_seconds, 0.1, Game.tuning.burn_rate_per_second - 0.1
+	)
 	_slot_holders.resize(CONTACT_SLOTS.size())
 	_build_crowd()
 	_build_camera()
@@ -65,16 +66,11 @@ func setup(target: Player, horde: NightDirector, world: Village, seconds: float)
 	)
 
 
-## One frame of the staged top-up. Returns `[credit, amount]`: fuel is only added
-## once the credit reaches `FUEL_STEP`, but the credit carries over, so the
-## average stays at `burn_rate - net_drain` whatever the frame time. A fixed-fps
-## render quantised a fixed-interval drip down to 4.05 fuel/s and ran the tank
-## dry at 51 s of a 60 s take.
-static func fuel_step(delta: float, credit: float, burn_rate: float, net_drain: float) -> Array:
-	credit += maxf(0.0, burn_rate - net_drain) * delta
-	if credit < FUEL_STEP:
-		return [credit, 0.0]
-	return [0.0, credit]
+## Per-frame top-up. Returns the fuel to add this frame so the tank drains at
+## `net_drain` per second instead of emptying in 16.6 s. Applied every frame so
+## the level never dips to zero between lumps.
+static func fuel_step(delta: float, burn_rate: float, net_drain: float) -> float:
+	return maxf(0.0, burn_rate - net_drain) * delta
 
 
 func _process(delta: float) -> void:
@@ -96,10 +92,9 @@ func _process(delta: float) -> void:
 		_top_up_timer = 0.5
 		_top_up_crowd()
 	if _firing:
-		var step := fuel_step(delta, _fuel_credit, Game.tuning.burn_rate_per_second, FUEL_NET_DRAIN)
-		_fuel_credit = step[0]
-		if step[1] > 0.0:
-			player.flamethrower.add_fuel(step[1])
+		player.flamethrower.add_fuel(
+			fuel_step(delta, Game.tuning.burn_rate_per_second, _fuel_net_drain)
+		)
 	if _elapsed >= duration:
 		_finish()
 
@@ -213,8 +208,8 @@ func _finish() -> void:
 		"slot_hp": slot_hp,
 		"staged": true,
 		"player_invulnerable": true,
-		"fuel_top_up_rate": Game.tuning.burn_rate_per_second - FUEL_NET_DRAIN,
-		"fuel_net_drain": FUEL_NET_DRAIN,
+		"fuel_top_up_rate": Game.tuning.burn_rate_per_second - _fuel_net_drain,
+		"fuel_net_drain": _fuel_net_drain,
 		"fuel_end": roundf(player.flamethrower.fuel),
 	}
 	var file := FileAccess.open(SUMMARY_PATH, FileAccess.WRITE)

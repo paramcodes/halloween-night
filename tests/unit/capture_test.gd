@@ -11,6 +11,7 @@ func test_soft_puff_is_a_soft_disc() -> void:
 	greater(image.get_pixel(32, 32).a, 0.9, "puff is opaque at its centre")
 	almost(image.get_pixel(0, 0).a, 0.0, 0.001, "puff fades to nothing at the edge")
 	check(Palette.material("flame_core").albedo_texture == texture, "the flame uses the puff")
+	check(Palette.material("flame_edge").albedo_texture == texture, "the edge uses the puff")
 	check(Palette.material("smoke").albedo_texture == texture, "the smoke uses the puff")
 
 
@@ -30,20 +31,30 @@ func test_burning_body_carries_its_own_fire() -> void:
 	visual.queue_free()
 
 
-## The staged top-up is what lets a 60 s take keep firing. A fixed-interval drip
-## quantised down to 4.05 fuel/s on a 30 fps render, so the tank emptied at 51 s
-## and the last seconds of the clip had no flame.
+## The plume is a hot core plus a cooler, wider edge layer and a smoke tail, so
+## it reads as a flame instead of a single solid bar.
+func test_flame_carries_an_edge_layer() -> void:
+	var gun := Flamethrower.new()
+	runner.add_child(gun)
+	check(gun.get_node_or_null("Nozzle/FlameEdge") != null, "the flame has a cooler edge layer")
+	gun.queue_free()
+
+
+## The staged top-up is what lets a long take keep firing. A fixed-interval drip
+## quantised down to 4.05 fuel/s on a 30 fps render, so the tank ran dry at 51 s
+## of a 60 s take. The drip is now applied every frame, so the level tracks the
+## intended drain instead of dipping to zero between lumps.
 func test_staged_top_up_keeps_the_tank_for_a_minute() -> void:
 	var burn := Game.tuning.burn_rate_per_second
+	var duration := 60.0
+	var fire_seconds := maxf(1.0, duration - 0.8 - 1.8)
+	var net_drain := clampf(Game.tuning.fuel_capacity / fire_seconds, 0.1, burn - 0.1)
 	var frame := 1.0 / 30.0
 	var fuel := Game.tuning.fuel_capacity
-	var credit := 0.0
 	var lowest := fuel
-	for _i in range(1800):
+	for i in range(int(duration * 30.0)):
 		fuel = maxf(0.0, fuel - burn * frame)
-		var step := CaptureRig.fuel_step(frame, credit, burn, 1.5)
-		credit = step[0]
-		fuel = minf(Game.tuning.fuel_capacity, fuel + step[1])
+		fuel = minf(Game.tuning.fuel_capacity, fuel + CaptureRig.fuel_step(frame, burn, net_drain))
 		lowest = minf(lowest, fuel)
-	almost(lowest, 10.0, 1.0, "a minute of fire drains the tank by 90")
-	greater(lowest, 5.0, "the flame never runs dry mid-take")
+	check(lowest > 0.0, "the flame stays lit for the whole minute")
+	almost(lowest, 0.0, 1.0, "the tank empties right at the cut")

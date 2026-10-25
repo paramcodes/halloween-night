@@ -104,6 +104,17 @@ static func material(key: String) -> StandardMaterial3D:
 			mat.emission_enabled = true
 			mat.emission = AMBER_HOT
 			mat.emission_energy_multiplier = 1.0
+		"flame_edge":
+			mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+			mat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+			mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+			mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+			mat.vertex_color_use_as_albedo = true
+			mat.albedo_texture = soft_puff()
+			mat.albedo_color = Color(0.9, 0.35, 0.12)
+			mat.emission_enabled = true
+			mat.emission = Color("d05018")
+			mat.emission_energy_multiplier = 0.6
 		"smoke":
 			mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 			mat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED

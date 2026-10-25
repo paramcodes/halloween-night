@@ -8,7 +8,7 @@ command and machine that produced it.
 | `perf_frame.png` | 200-zombie stress run, 1280×720, night lighting, horde staged in front of the player, flamethrower firing | `tools/perf.sh 60 5` |
 | `perf.json` | Frame time, draw calls, triangles, VRAM, engine/GPU/window for the same 60 s run | `tools/perf.sh 60 5` |
 | `flame_feel.mp4` | 60 s staged take at 30 fps: flame stream crossing three burning shamblers, HUD fuel drain (14 of 100 left at cut), 34 kills, slow camera drift | `DRIVER=x11 tools/capture.sh 60 30` |
-| `flame_feel_8s.mp4` | 8 s staged take at 30 fps: the same composition, shorter, used for a quick read | `DRIVER=x11 tools/capture.sh 8 30` |
+| `flame_feel_90s.mp4` | 90 s staged take at 30 fps: the same composition stretched to a minute and a half, flame lit for 87 s, 11 kills | `DRIVER=x11 tools/capture.sh 90 30` |
 | `capture.json` | Provenance for that take: engine, GPU, frames, kills, `staged: true`, `player_invulnerable: true` | written by the same command |
 | `capture_failure.log` | Same proof for the capture suite: one assertion broken, runner exits 1, then reverted | see the log header |
 | `smoke.json` | Seven-night headless smoke run: victory, phases, spawn and kill counts | `godot --headless --path . -- --smoke --fresh` |

@@ -1,0 +1,24 @@
+{
+	"engine": "4.7.2-stable (arch_linux)",
+	"frames": 2701,
+	"fuel_end": 0.0,
+	"fuel_net_drain": 1.1441647597254,
+	"fuel_top_up_rate": 4.8558352402746,
+	"gpu": "Intel(R) HD Graphics 4400 (HSW GT2)",
+	"kills_during_capture": 11,
+	"kills_total": 11.0,
+	"player_invulnerable": true,
+	"seconds": 90.0,
+	"slot_hp": [
+		100.0,
+		2.0,
+		100.0
+	],
+	"staged": true,
+	"timestamp": "2026-10-25T01:18:07",
+	"window": [
+		1280,
+		720
+	],
+	"zombies_alive": 40
+}

@@ -17,6 +17,7 @@ var nozzle: Node3D
 var _tick_accumulator := 0.0
 var _rng := RandomNumberGenerator.new()
 var _particles: GPUParticles3D
+var _edge: GPUParticles3D
 var _smoke: GPUParticles3D
 var _light: OmniLight3D
 var _last_emitted_fuel := -1.0
@@ -98,6 +99,8 @@ func _place_gun() -> void:
 func _set_emitting(on: bool) -> void:
 	if _particles != null and _particles.emitting != on:
 		_particles.emitting = on
+	if _edge != null and _edge.emitting != on:
+		_edge.emitting = on
 	if _smoke != null and _smoke.emitting != on:
 		_smoke.emitting = on
 	if _light != null:
@@ -183,6 +186,17 @@ func _build_particles() -> void:
 	_particles.emitting = false
 	nozzle.add_child(_particles)
 
+	_edge = GPUParticles3D.new()
+	_edge.name = "FlameEdge"
+	_edge.amount = 45
+	_edge.lifetime = 1.05
+	_edge.local_coords = false
+	_edge.visibility_aabb = AABB(Vector3(-9, -4, -9), Vector3(18, 9, 18))
+	_edge.process_material = _edge_process_material()
+	_edge.draw_pass_1 = _particle_quad(Palette.material("flame_edge"), 0.72)
+	_edge.emitting = false
+	nozzle.add_child(_edge)
+
 	_smoke = GPUParticles3D.new()
 	_smoke.name = "SmokeParticles"
 	_smoke.amount = 18
@@ -247,6 +261,41 @@ func _flame_process_material() -> ParticleProcessMaterial:
 	gradient.set_color(0, Color(1.0, 0.86, 0.5, 0.9))
 	gradient.set_color(1, Color(0.35, 0.05, 0.01, 0.0))
 	gradient.add_point(0.35, Color(1.0, 0.46, 0.08, 0.75))
+	var ramp := GradientTexture1D.new()
+	ramp.gradient = gradient
+	mat.color_ramp = ramp
+	return mat
+
+
+func _edge_process_material() -> ParticleProcessMaterial:
+	var mat := ParticleProcessMaterial.new()
+	mat.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
+	mat.emission_sphere_radius = 0.16
+	mat.direction = Vector3(0, 0, -1)
+	mat.spread = 22.0
+	mat.initial_velocity_min = 6.0
+	mat.initial_velocity_max = 11.0
+	mat.gravity = Vector3(0, 0.4, 0)
+	mat.damping_min = 1.2
+	mat.damping_max = 2.0
+	mat.scale_min = 0.35
+	mat.scale_max = 0.75
+	mat.turbulence_enabled = true
+	mat.turbulence_noise_strength = 0.9
+	mat.turbulence_noise_scale = 2.4
+	mat.turbulence_influence_min = 0.08
+	mat.turbulence_influence_max = 0.22
+	var scale_curve := Curve.new()
+	scale_curve.add_point(Vector2(0.0, 0.3))
+	scale_curve.add_point(Vector2(0.4, 1.4))
+	scale_curve.add_point(Vector2(1.0, 0.0))
+	var scale_texture := CurveTexture.new()
+	scale_texture.curve = scale_curve
+	mat.scale_curve = scale_texture
+	var gradient := Gradient.new()
+	gradient.set_color(0, Color(1.0, 0.55, 0.2, 0.55))
+	gradient.set_color(1, Color(0.25, 0.05, 0.02, 0.0))
+	gradient.add_point(0.5, Color(0.75, 0.22, 0.05, 0.35))
 	var ramp := GradientTexture1D.new()
 	ramp.gradient = gradient
 	mat.color_ramp = ramp
